@@ -1,0 +1,59 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: var(--s5) 0;
+}
+
+.mark {
+  width: 58px;
+  height: 58px;
+  border-radius: var(--r-pill);
+  border: 2px dashed var(--line);
+  position: relative;
+  flex: none;
+}
+
+/* an empty plate */
+.plate::after {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--hairline);
+}
+
+/* a struck-through circle for "not found" */
+.missing::after {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 27px;
+  width: 24px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: var(--muted-2);
+  transform: rotate(-38deg);
+}
+
+/* a small spark for "nothing computed yet" */
+.spark::after {
+  content: '';
+  position: absolute;
+  inset: 18px;
+  border-radius: 3px;
+  background: var(--grad-saffron);
+  opacity: 0.5;
+  transform: rotate(45deg);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: var(--track-display);
+}
+.body { font-size: 15px; color: var(--text-3); max-width: 36ch; }
+
+.actions { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s2); }

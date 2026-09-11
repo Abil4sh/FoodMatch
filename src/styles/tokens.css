@@ -1,0 +1,86 @@
+:root {
+  /* ink + surfaces */
+  --ink: #17130F;
+  --ink-2: #241D17;
+  --ink-3: #2E2620;
+  --ink-line: #3A322A;
+  --cream: #FBF7F1;
+  --cream-2: #F2EAE0;
+  --sand: #EDE4D8;
+  --hairline: #EAE0D3;
+  --line: #DACFC0;
+
+  /* text */
+  --text: #17130F;
+  --text-2: #3A332C;
+  --text-3: #5C5249;
+  --muted: #726860;
+  --muted-2: #73695E;
+  --on-ink: #FBF7F1;
+  --on-ink-2: #A09385;
+  --on-ink-3: #CFC4B6;
+
+  /* accents — one saffron action per screen */
+  --saffron: #F7B733;
+  --ember: #EE7C11;
+  --amber-ink: #9A5D07;
+  --chilli: #B4402C;
+  --chilli-soft: #E0563C;
+  --grad-saffron: linear-gradient(140deg, #F7B733, #EE7C11);
+
+  /* avatars */
+  /* Avatar backgrounds, each with the text colour that meets AA on it.
+     --av-1 is light enough that white initials failed contrast. */
+  --av-1: #E9873F;
+  --av-1-fg: #17130F;
+  --av-2-fg: #FFFFFF;
+  --av-3-fg: #FFFFFF;
+  --av-4-fg: #FFFFFF;
+  --av-2: #4C6B57;
+  --av-3: #8B5A6B;
+  --av-4: #3C5878;
+
+  /* type */
+  --font-display: "Outfit", system-ui, sans-serif;
+  --font-ui: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --track-display: -0.035em;
+  --track-mono: 0.16em;
+
+  /* radius — 16 cards, 14 buttons, 999 chips */
+  --r-card: 16px;
+  --r-btn: 14px;
+  --r-sm: 12px;
+  --r-xs: 10px;
+  --r-pill: 999px;
+  --r-frame: 44px;
+
+  /* two elevations only */
+  --sh-rest: 0 1px 2px rgba(23, 19, 15, 0.05), 0 10px 24px -18px rgba(23, 19, 15, 0.35);
+  --sh-float: 0 1px 2px rgba(23, 19, 15, 0.05), 0 28px 56px -20px rgba(23, 19, 15, 0.4);
+  --sh-ink: 0 22px 40px -24px rgba(23, 19, 15, 0.7);
+  --sh-saffron: 0 12px 26px -12px rgba(238, 124, 17, 0.75);
+
+  /* spacing 4 / 8 / 12 / 16 / 24 / 32, gutter 20 */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --gutter: 20px;
+
+  /* device */
+  --phone-w: 390px;
+  --phone-h: 844px;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/* photography placeholder until real shots land */
+.photoStripe {
+  background: repeating-linear-gradient(135deg, #E4DACB 0 8px, #DCD0BE 8px 16px);
+}
+.photoStripeDark {
+  background: repeating-linear-gradient(135deg, #3A322A 0 12px, #332B24 12px 24px);
+}

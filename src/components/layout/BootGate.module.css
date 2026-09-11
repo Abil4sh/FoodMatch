@@ -1,0 +1,32 @@
+.wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s3);
+  padding: var(--s5) var(--gutter);
+}
+
+.pulse {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-pill);
+  background: var(--grad-saffron);
+  animation: breathe 1.4s var(--ease) infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(0.86); opacity: 0.7; }
+  50% { transform: scale(1); opacity: 1; }
+}
+
+.text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.errorWrap { padding: var(--s2) var(--gutter) var(--s5); }

@@ -1,0 +1,55 @@
+.bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+  padding: 14px 26px calc(22px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--hairline);
+  background: var(--cream);
+}
+.barInk { background: var(--ink); border-top-color: var(--ink-3); }
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted-2);
+  transition: color 0.14s var(--ease);
+}
+.tab:hover { color: var(--text-2); }
+.glyph { width: 20px; height: 20px; border: 2px solid currentColor; }
+.sq { border-radius: 7px; }
+.ci { border-radius: var(--r-pill); }
+.label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+.on { color: var(--ink); }
+.on .glyph { background: var(--ink); border-color: var(--ink); }
+.barInk .on { color: var(--saffron); }
+.barInk .on .glyph { background: var(--saffron); border-color: var(--saffron); }
+
+/* wide screens: the bar becomes a vertical rail outside the device */
+.rail { display: none; }
+
+@media (min-width: 1100px) {
+  .bar { display: none; }
+  .rail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: var(--s5);
+    border-top: 1px solid var(--line);
+  }
+  .rail .tab {
+    flex-direction: row;
+    gap: var(--s3);
+    padding: 12px 14px;
+    border-radius: var(--r-sm);
+    color: var(--muted);
+  }
+  .rail .tab:hover { background: #E6DBCC; color: var(--text); }
+  .rail .label { font-size: 11px; letter-spacing: 0.14em; }
+  .rail .on { background: var(--ink); color: var(--on-ink); }
+  .rail .on .glyph { background: var(--saffron); border-color: var(--saffron); }
+}

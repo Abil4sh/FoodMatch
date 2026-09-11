@@ -1,0 +1,12 @@
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  color: #FFFFFF; /* overridden per-avatar by --av-N-fg */
+  font-weight: 700;
+  flex: none;
+  user-select: none;
+}
+.ring { border: 2.5px solid var(--cream); }
+.ringInk { border: 2px solid var(--ink); }

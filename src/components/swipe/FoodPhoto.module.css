@@ -1,0 +1,33 @@
+.photo {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(var(--angle, 165deg), var(--from), var(--to));
+  isolation: isolate;
+}
+
+.art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* soft directional light so the plate reads as a photographed surface */
+.sheen {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(70% 50% at 26% 12%, rgba(255, 252, 245, 0.4), transparent 62%),
+    radial-gradient(90% 60% at 84% 100%, rgba(90, 52, 20, 0.22), transparent 60%);
+  mix-blend-mode: soft-light;
+}
+
+/* keeps overlaid type legible without dulling the food */
+.vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 50% 20%, rgba(255, 255, 255, 0.22), transparent 60%),
+    linear-gradient(to top, rgba(23, 19, 15, 0.78) 0%, rgba(23, 19, 15, 0.28) 34%, rgba(23, 19, 15, 0) 62%);
+}

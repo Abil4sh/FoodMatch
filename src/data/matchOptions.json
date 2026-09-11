@@ -1,0 +1,24 @@
+{
+  "cuisines": [
+    { "id": "p_south_indian", "label": "South Indian", "hint": "Dosa, idli, filter coffee" },
+    { "id": "p_biryani", "label": "Biryani", "hint": "Dum, Andhra, Thalassery" },
+    { "id": "p_north_indian", "label": "North Indian", "hint": "Butter chicken, kebabs" },
+    { "id": "p_asian", "label": "Asian", "hint": "Ramen, Thai, Korean" },
+    { "id": "p_fast_food", "label": "Fast Food", "hint": "Burgers, rolls, pizza" },
+    { "id": "p_healthy", "label": "Healthy", "hint": "Bowls, salads, grills" },
+    { "id": "p_cafe", "label": "Cafe", "hint": "Brunch, coffee, bakes" },
+    { "id": "p_desserts", "label": "Desserts", "hint": "Ice cream, halwa, cake" }
+  ],
+  "budgets": [
+    { "value": 300, "label": "\u20B9300", "note": "Street food and quick bites" },
+    { "value": 500, "label": "\u20B9500", "note": "Everyday sit-down dinner" },
+    { "value": 700, "label": "\u20B9700", "note": "Proper night out" },
+    { "value": 1000, "label": "\u20B91000+", "note": "Going all out" }
+  ],
+  "distances": [
+    { "value": 2, "label": "2 km", "note": "Walk or a short auto" },
+    { "value": 5, "label": "5 km", "note": "Your side of town" },
+    { "value": 10, "label": "10 km", "note": "Anywhere worth the drive" }
+  ],
+  "nameSuggestions": ["Friday Dinner", "Team Lunch", "Sunday Brunch", "Post-match Biryani"]
+}

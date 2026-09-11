@@ -1,0 +1,23 @@
+.list { display: flex; flex-direction: column; gap: 11px; }
+
+.row { display: flex; align-items: center; gap: 12px; }
+
+.label {
+  flex: none;
+  width: 86px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.bar { flex: 1; }
+
+.value {
+  flex: none;
+  width: 26px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  color: var(--muted);
+}

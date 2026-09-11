@@ -1,0 +1,7 @@
+.wrap { position: relative; width: 8px; height: 8px; flex: none; }
+.dot, .ping { position: absolute; inset: 0; border-radius: var(--r-pill); background: var(--saffron); }
+.ping { animation: ping 1.8s ease-out infinite; }
+@keyframes ping {
+  0%, 100% { transform: scale(1); opacity: 0.45; }
+  50% { transform: scale(1.6); opacity: 0; }
+}

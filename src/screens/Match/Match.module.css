@@ -1,0 +1,105 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  padding: 0 var(--gutter) var(--s5);
+}
+
+.head { display: flex; align-items: center; gap: var(--s3); padding: 10px 0 2px; }
+.back {
+  font-size: 26px;
+  line-height: 1;
+  width: 44px;
+  height: 44px;
+  margin-left: -12px;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  transition: background 0.16s var(--ease);
+}
+.back:hover { background: var(--cream-2); }
+.groupName {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--muted-2);
+  text-align: center;
+}
+.spacer { width: 44px; }
+
+.hero { position: relative; padding: var(--s3) 0 var(--s2); }
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--amber-ink);
+}
+.verdict {
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1.08;
+  letter-spacing: var(--track-display);
+}
+
+/* celebration */
+.burst {
+  position: absolute;
+  top: 26px;
+  left: 40%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.shard {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--grad-saffron);
+}
+.shard:nth-child(even) { background: var(--ember); border-radius: 50%; }
+
+.runners { display: flex; flex-direction: column; gap: 10px; }
+.list { display: flex; flex-direction: column; gap: 10px; }
+
+/* no-likes fallback */
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: var(--s4) 0;
+}
+.emptyMark {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-pill);
+  border: 2px dashed var(--line);
+  position: relative;
+}
+.emptyMark::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: 26px;
+  width: 22px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: var(--muted-2);
+}
+.emptyTitle {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: var(--track-display);
+}
+.emptyBody { font-size: 15px; color: var(--text-3); max-width: 36ch; }
+
+.actions { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s2); }

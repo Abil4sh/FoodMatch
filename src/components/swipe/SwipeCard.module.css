@@ -1,0 +1,120 @@
+.card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--ink);
+  box-shadow: var(--sh-float);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  transform-origin: 50% 90%;
+  will-change: transform;
+}
+
+.behind { cursor: default; pointer-events: none; }
+
+/* the art must never swallow or reinterpret the gesture */
+.photo { position: absolute; inset: 0; pointer-events: none; -webkit-user-drag: none; }
+.photo * { pointer-events: none; -webkit-user-drag: none; }
+.info { -webkit-user-drag: none; }
+
+/* type sits over the lower third of the shot */
+.info {
+  position: relative;
+  padding: var(--gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--on-ink);
+}
+
+.titleRow { display: flex; align-items: center; gap: var(--s2); }
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: var(--track-display);
+  color: #FFFFFF;
+  text-shadow: 0 2px 14px rgba(23, 19, 15, 0.45);
+}
+
+.sub {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(251, 247, 241, 0.86);
+  /* one line only — a wrapped cuisine line crowds the facts row beneath it */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.facts {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(251, 247, 241, 0.92);
+}
+.dot { width: 3px; height: 3px; border-radius: 50%; background: rgba(251, 247, 241, 0.5); }
+.rating { color: var(--saffron); }
+.price { font-family: var(--font-display); font-weight: 700; font-size: 17px; }
+
+/* veg / non-veg marker, the way Indian menus mark it */
+.diet {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  border: 2px solid currentColor;
+  position: relative;
+  flex: none;
+}
+.diet::after {
+  content: '';
+  position: absolute;
+  inset: 2.5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.veg { color: #7FC08A; }
+.nonVeg { color: #E0563C; }
+
+/* stamps */
+.stamp {
+  position: absolute;
+  top: 28px;
+  padding: 9px 18px;
+  border-radius: var(--r-xs);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+}
+
+.like {
+  left: 22px;
+  color: var(--ink);
+  background: var(--grad-saffron);
+  border: 3px solid rgba(23, 19, 15, 0.22);
+  box-shadow: var(--sh-saffron);
+}
+
+.pass {
+  right: 22px;
+  color: var(--cream);
+  background: rgba(23, 19, 15, 0.72);
+  border: 3px solid rgba(251, 247, 241, 0.5);
+}

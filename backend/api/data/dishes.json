@@ -1,0 +1,206 @@
+[
+  {
+    "id": "d_tonkotsu",
+    "type": "dish",
+    "name": "Tonkotsu Ramen",
+    "restaurantId": "r_ramen_house",
+    "restaurantName": "Ramen House",
+    "area": "Koramangala 5th Block",
+    "price": 480,
+    "rating": 4.6,
+    "distanceKm": 1.2,
+    "etaMin": 26,
+    "photoLabel": "RAMEN BOWL — CLOSE UP",
+    "cuisines": [
+      "Japanese"
+    ],
+    "veg": false
+  },
+  {
+    "id": "d_ghee_dosa",
+    "type": "dish",
+    "name": "Ghee Roast Dosa",
+    "restaurantId": "r_dosa_diaries",
+    "restaurantName": "Dosa Diaries",
+    "area": "HSR Layout",
+    "price": 180,
+    "rating": 4.6,
+    "distanceKm": 0.8,
+    "etaMin": 18,
+    "photoLabel": "DOSA ON BANANA LEAF",
+    "cuisines": [
+      "South Indian"
+    ],
+    "veg": true
+  },
+  {
+    "id": "d_mutton_biryani",
+    "type": "dish",
+    "name": "Mutton Dum Biryani",
+    "restaurantId": "r_biryani_adda",
+    "restaurantName": "Biryani Adda",
+    "area": "Indiranagar",
+    "price": 420,
+    "rating": 4.5,
+    "distanceKm": 2.4,
+    "etaMin": 34,
+    "photoLabel": "BIRYANI — HANDI OPEN",
+    "cuisines": [
+      "Hyderabadi"
+    ],
+    "veg": false
+  },
+  {
+    "id": "d_galouti",
+    "type": "dish",
+    "name": "Galouti Kebab",
+    "restaurantId": "r_kebab_kothi",
+    "restaurantName": "Kebab Kothi",
+    "area": "Koramangala 8th Block",
+    "price": 390,
+    "rating": 4.4,
+    "distanceKm": 3.1,
+    "etaMin": 29,
+    "photoLabel": "KEBAB PLATTER — SIDE",
+    "cuisines": [
+      "Awadhi"
+    ],
+    "veg": false
+  },
+  {
+    "id": "d_filter_flan",
+    "type": "dish",
+    "name": "Filter Coffee Flan",
+    "restaurantId": "r_nomad_bakehouse",
+    "restaurantName": "Nomad Bakehouse",
+    "area": "Indiranagar",
+    "price": 260,
+    "rating": 4.7,
+    "distanceKm": 2.8,
+    "etaMin": 31,
+    "photoLabel": "DESSERT — CLOSE UP",
+    "cuisines": [
+      "Cafe"
+    ],
+    "veg": true
+  },
+  {
+    "id": "d_paneer_thali",
+    "type": "dish",
+    "name": "Rajasthani Thali",
+    "restaurantId": "r_thali_theory",
+    "restaurantName": "Thali Theory",
+    "area": "BTM Layout",
+    "price": 320,
+    "rating": 4.2,
+    "distanceKm": 3.6,
+    "etaMin": 33,
+    "photoLabel": "THALI — OVERHEAD",
+    "cuisines": [
+      "North Indian"
+    ],
+    "veg": true
+  },
+  {
+    "id": "d_chilli_garlic_noodles",
+    "type": "dish",
+    "name": "Chilli Garlic Noodles",
+    "restaurantId": "r_wok_lane",
+    "restaurantName": "Wok Lane",
+    "area": "Sarjapur Road",
+    "price": 290,
+    "rating": 4.1,
+    "distanceKm": 4,
+    "etaMin": 38,
+    "photoLabel": "NOODLES — TOSS SHOT",
+    "cuisines": [
+      "Chinese"
+    ],
+    "veg": true
+  },
+  {
+    "id": "d_margherita",
+    "type": "dish",
+    "name": "Sourdough Margherita",
+    "restaurantId": "r_pizza_pilgrim",
+    "restaurantName": "Slice Society",
+    "area": "HSR Layout",
+    "price": 440,
+    "rating": 4.4,
+    "distanceKm": 1.5,
+    "etaMin": 24,
+    "photoLabel": "PIZZA — CLOSE UP",
+    "cuisines": [
+      "Pizza"
+    ],
+    "veg": true
+  },
+  {
+    "id": "d_andhra_biryani",
+    "type": "dish",
+    "name": "Boneless Chicken Biryani",
+    "restaurantId": "r_meghana",
+    "restaurantName": "Meghana Foods",
+    "area": "Residency Road",
+    "price": 390,
+    "rating": 4.6,
+    "distanceKm": 5.2,
+    "etaMin": 41,
+    "photoLabel": "BIRYANI — SPOON LIFT",
+    "cuisines": [
+      "Andhra"
+    ],
+    "veg": false
+  },
+  {
+    "id": "d_ol_fashioned",
+    "type": "dish",
+    "name": "Ol' Fashioned Burger",
+    "restaurantId": "r_truffles",
+    "restaurantName": "Truffles",
+    "area": "Koramangala 4th Block",
+    "price": 350,
+    "rating": 4.5,
+    "distanceKm": 2.1,
+    "etaMin": 28,
+    "photoLabel": "BURGER — CROSS SECTION",
+    "cuisines": [
+      "American"
+    ],
+    "veg": false
+  },
+  {
+    "id": "d_khow_suey",
+    "type": "dish",
+    "name": "Coconut Khow Suey",
+    "restaurantId": "r_burma_burma",
+    "restaurantName": "Burma Burma",
+    "area": "Indiranagar",
+    "price": 460,
+    "rating": 4.5,
+    "distanceKm": 3.4,
+    "etaMin": 35,
+    "photoLabel": "KHOW SUEY — CONDIMENTS",
+    "cuisines": [
+      "Burmese"
+    ],
+    "veg": true
+  },
+  {
+    "id": "d_shawarma",
+    "type": "dish",
+    "name": "Chicken Shawarma Roll",
+    "restaurantId": "r_leon_grill",
+    "restaurantName": "Leon Grill",
+    "area": "Koramangala 6th Block",
+    "price": 170,
+    "rating": 4.3,
+    "distanceKm": 2.7,
+    "etaMin": 25,
+    "photoLabel": "SHAWARMA — HALVED",
+    "cuisines": [
+      "Middle Eastern"
+    ],
+    "veg": false
+  }
+]

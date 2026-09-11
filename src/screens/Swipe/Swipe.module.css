@@ -1,0 +1,172 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  touch-action: pan-y;
+  padding: 0 var(--gutter) var(--s4);
+}
+
+/* deliberately quiet: the card is the hero */
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: 10px 0 6px;
+}
+.back {
+  font-size: 26px;
+  line-height: 1;
+  width: 44px;
+  height: 44px;
+  margin-left: -12px;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  transition: background 0.16s var(--ease);
+}
+.back:hover { background: var(--cream-2); }
+.groupName {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--muted-2);
+  text-align: center;
+}
+.count {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  min-width: 46px;
+  text-align: right;
+}
+.countTotal { color: var(--muted-2); font-weight: 600; }
+
+.toggle { padding-bottom: var(--s3); }
+
+/* card stack */
+.deck {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  margin-bottom: var(--s4);
+  perspective: 1200px;
+}
+
+/* actions */
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  padding-bottom: var(--s4);
+}
+.action {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--r-pill);
+  transition: transform 0.14s var(--ease), background 0.14s var(--ease), filter 0.14s var(--ease);
+}
+.action:active { transform: scale(0.93); }
+
+.pass { background: var(--cream); border: 1.5px solid var(--line); box-shadow: var(--sh-rest); }
+.pass:hover { background: var(--cream-2); }
+.like { background: var(--grad-saffron); box-shadow: var(--sh-saffron); }
+.like:hover { filter: brightness(1.05); }
+
+/* × drawn from two bars so no icon dependency is needed */
+.glyphPass, .glyphLike { position: relative; display: block; width: 22px; height: 22px; }
+.glyphPass::before, .glyphPass::after {
+  content: '';
+  position: absolute;
+  top: 9px;
+  left: 0;
+  width: 22px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: var(--text-2);
+}
+.glyphPass::before { transform: rotate(45deg); }
+.glyphPass::after { transform: rotate(-45deg); }
+
+/* a tick for like */
+.glyphLike::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 2px;
+  width: 11px;
+  height: 18px;
+  border-right: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
+  border-radius: 2px;
+  transform: rotate(42deg);
+}
+
+/* group progress */
+.groupStrip {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px 14px;
+  border-radius: var(--r-card);
+  background: var(--cream-2);
+}
+.stripHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s2);
+}
+.stripTitle {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+/* states plainly that the other members are not live data */
+.stripNote {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.you { display: flex; align-items: center; gap: 10px; }
+.youLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+.youBar { flex: 1; }
+.youCount {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  color: var(--text-2);
+  min-width: 44px;
+  text-align: right;
+}
+
+.others { display: flex; flex-wrap: wrap; gap: var(--s3); }
+.other { display: flex; align-items: center; gap: 6px; }
+.otherCount {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  color: var(--muted);
+}
+
+@media (min-width: 768px) {
+  .deck { min-height: 0; }
+}

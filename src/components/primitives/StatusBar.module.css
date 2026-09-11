@@ -1,0 +1,19 @@
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 26px 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  flex: none;
+}
+.dark { color: var(--on-ink); }
+.icons { display: flex; align-items: center; gap: 5px; }
+.batt { width: 16px; height: 9px; border: 1.4px solid currentColor; border-radius: 2px; }
+.tip { width: 3px; height: 9px; background: currentColor; border-radius: 1px; }
+
+/* real devices draw their own status bar */
+@media (max-width: 767px) {
+  .bar { display: none; }
+}

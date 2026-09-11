@@ -1,0 +1,290 @@
+[
+  {
+    "id": "r_ramen_house",
+    "type": "restaurant",
+    "name": "Ramen House",
+    "cuisines": [
+      "Japanese",
+      "Ramen"
+    ],
+    "area": "Koramangala 5th Block",
+    "distanceKm": 1.2,
+    "etaMin": 26,
+    "rating": 4.5,
+    "reviews": 2140,
+    "priceForTwo": 700,
+    "priceTier": 2,
+    "photoLabel": "RAMEN BOWL — HERO SHOT",
+    "groupMatchPct": 91,
+    "tags": [
+      "Late night",
+      "Small plates"
+    ],
+    "hours": "12:00 PM – 11:30 PM",
+    "address": "1st Cross, 5th Block, Koramangala, Bengaluru 560095"
+  },
+  {
+    "id": "r_biryani_adda",
+    "type": "restaurant",
+    "name": "Biryani Adda",
+    "cuisines": [
+      "Hyderabadi",
+      "Biryani"
+    ],
+    "area": "Indiranagar",
+    "distanceKm": 2.4,
+    "etaMin": 34,
+    "rating": 4.4,
+    "reviews": 5310,
+    "priceForTwo": 550,
+    "priceTier": 2,
+    "photoLabel": "DUM BIRYANI — TOP DOWN",
+    "groupMatchPct": 88,
+    "tags": [
+      "Family style",
+      "Bestseller"
+    ],
+    "hours": "11:30 AM – 12:00 AM",
+    "address": "100 Feet Road, Indiranagar, Bengaluru 560038"
+  },
+  {
+    "id": "r_dosa_diaries",
+    "type": "restaurant",
+    "name": "Dosa Diaries",
+    "cuisines": [
+      "South Indian",
+      "Breakfast"
+    ],
+    "area": "HSR Layout",
+    "distanceKm": 0.8,
+    "etaMin": 18,
+    "rating": 4.6,
+    "reviews": 3890,
+    "priceForTwo": 300,
+    "priceTier": 1,
+    "photoLabel": "DOSA ON BANANA LEAF",
+    "groupMatchPct": 81,
+    "tags": [
+      "Pure veg",
+      "Quick bite"
+    ],
+    "hours": "7:00 AM – 10:30 PM",
+    "address": "27th Main, Sector 2, HSR Layout, Bengaluru 560102"
+  },
+  {
+    "id": "r_kebab_kothi",
+    "type": "restaurant",
+    "name": "Kebab Kothi",
+    "cuisines": [
+      "Awadhi",
+      "Kebab"
+    ],
+    "area": "Koramangala 8th Block",
+    "distanceKm": 3.1,
+    "etaMin": 29,
+    "rating": 4.3,
+    "reviews": 1670,
+    "priceForTwo": 900,
+    "priceTier": 3,
+    "photoLabel": "SEEKH KEBAB PLATTER",
+    "groupMatchPct": 74,
+    "tags": [
+      "Charcoal grill",
+      "Date night"
+    ],
+    "hours": "6:00 PM – 1:00 AM",
+    "address": "80 Feet Road, 8th Block, Koramangala, Bengaluru 560095"
+  },
+  {
+    "id": "r_nomad_bakehouse",
+    "type": "restaurant",
+    "name": "Nomad Bakehouse",
+    "cuisines": [
+      "Cafe",
+      "Bakery"
+    ],
+    "area": "Indiranagar",
+    "distanceKm": 2.8,
+    "etaMin": 31,
+    "rating": 4.7,
+    "reviews": 2260,
+    "priceForTwo": 650,
+    "priceTier": 2,
+    "photoLabel": "CAFE COUNTER — WIDE",
+    "groupMatchPct": 69,
+    "tags": [
+      "Filter coffee",
+      "Work friendly"
+    ],
+    "hours": "8:00 AM – 10:00 PM",
+    "address": "12th Main, Indiranagar, Bengaluru 560038"
+  },
+  {
+    "id": "r_thali_theory",
+    "type": "restaurant",
+    "name": "Thali Theory",
+    "cuisines": [
+      "North Indian",
+      "Thali"
+    ],
+    "area": "BTM Layout",
+    "distanceKm": 3.6,
+    "etaMin": 33,
+    "rating": 4.2,
+    "reviews": 1420,
+    "priceForTwo": 480,
+    "priceTier": 1,
+    "photoLabel": "UNLIMITED THALI — OVERHEAD",
+    "groupMatchPct": 63,
+    "tags": [
+      "Unlimited",
+      "Pure veg"
+    ],
+    "hours": "11:00 AM – 10:30 PM",
+    "address": "16th Main, BTM 2nd Stage, Bengaluru 560076"
+  },
+  {
+    "id": "r_wok_lane",
+    "type": "restaurant",
+    "name": "Wok Lane",
+    "cuisines": [
+      "Chinese",
+      "Asian"
+    ],
+    "area": "Sarjapur Road",
+    "distanceKm": 4,
+    "etaMin": 38,
+    "rating": 4.1,
+    "reviews": 980,
+    "priceForTwo": 620,
+    "priceTier": 2,
+    "photoLabel": "NOODLE WOK — ACTION SHOT",
+    "groupMatchPct": 58,
+    "tags": [
+      "Spicy",
+      "Delivery star"
+    ],
+    "hours": "12:00 PM – 11:00 PM",
+    "address": "Kaikondrahalli, Sarjapur Road, Bengaluru 560035"
+  },
+  {
+    "id": "r_pizza_pilgrim",
+    "type": "restaurant",
+    "name": "Slice Society",
+    "cuisines": [
+      "Pizza",
+      "Italian"
+    ],
+    "area": "HSR Layout",
+    "distanceKm": 1.5,
+    "etaMin": 24,
+    "rating": 4.4,
+    "reviews": 1310,
+    "priceForTwo": 800,
+    "priceTier": 2,
+    "photoLabel": "SOURDOUGH PIZZA — CLOSE UP",
+    "groupMatchPct": 55,
+    "tags": [
+      "Wood fired",
+      "Shareable"
+    ],
+    "hours": "12:00 PM – 11:00 PM",
+    "address": "Sector 6, HSR Layout, Bengaluru 560102"
+  },
+  {
+    "id": "r_meghana",
+    "type": "restaurant",
+    "name": "Meghana Foods",
+    "cuisines": [
+      "Andhra",
+      "Biryani"
+    ],
+    "area": "Residency Road",
+    "distanceKm": 5.2,
+    "etaMin": 41,
+    "rating": 4.5,
+    "reviews": 9840,
+    "priceForTwo": 800,
+    "priceTier": 2,
+    "photoLabel": "BONELESS BIRYANI — HANDI",
+    "groupMatchPct": 93,
+    "tags": [
+      "Always packed",
+      "Spicy"
+    ],
+    "hours": "11:00 AM – 11:00 PM",
+    "address": "Residency Road, Shanthala Nagar, Bengaluru 560025"
+  },
+  {
+    "id": "r_truffles",
+    "type": "restaurant",
+    "name": "Truffles",
+    "cuisines": [
+      "American",
+      "Burgers"
+    ],
+    "area": "Koramangala 4th Block",
+    "distanceKm": 2.1,
+    "etaMin": 28,
+    "rating": 4.4,
+    "reviews": 7620,
+    "priceForTwo": 900,
+    "priceTier": 2,
+    "photoLabel": "BURGER — STACKED",
+    "groupMatchPct": 85,
+    "tags": [
+      "Long queue",
+      "Comfort food"
+    ],
+    "hours": "11:00 AM – 11:30 PM",
+    "address": "St Marks Road & Koramangala 4th Block, Bengaluru"
+  },
+  {
+    "id": "r_burma_burma",
+    "type": "restaurant",
+    "name": "Burma Burma",
+    "cuisines": [
+      "Burmese",
+      "Vegetarian"
+    ],
+    "area": "Indiranagar",
+    "distanceKm": 3.4,
+    "etaMin": 35,
+    "rating": 4.6,
+    "reviews": 4180,
+    "priceForTwo": 1400,
+    "priceTier": 3,
+    "photoLabel": "KHOW SUEY — TOP DOWN",
+    "groupMatchPct": 79,
+    "tags": [
+      "Pure veg",
+      "Tea room"
+    ],
+    "hours": "12:00 PM – 10:30 PM",
+    "address": "12th Main, Indiranagar, Bengaluru 560008"
+  },
+  {
+    "id": "r_leon_grill",
+    "type": "restaurant",
+    "name": "Leon Grill",
+    "cuisines": [
+      "Middle Eastern",
+      "Grill"
+    ],
+    "area": "Koramangala 6th Block",
+    "distanceKm": 2.7,
+    "etaMin": 25,
+    "rating": 4.3,
+    "reviews": 6110,
+    "priceForTwo": 450,
+    "priceTier": 1,
+    "photoLabel": "SHAWARMA — ROLLED",
+    "groupMatchPct": 82,
+    "tags": [
+      "Late night",
+      "Quick bite"
+    ],
+    "hours": "11:30 AM – 1:00 AM",
+    "address": "80 Feet Road, 6th Block, Koramangala, Bengaluru 560095"
+  }
+]

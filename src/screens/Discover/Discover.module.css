@@ -1,0 +1,91 @@
+.wrap { display: flex; flex-direction: column; }
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding: 14px var(--gutter) 10px;
+}
+.place { display: flex; flex-direction: column; gap: 2px; }
+.placeLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.placeName { font-family: var(--font-display); font-weight: 700; font-size: 19px; letter-spacing: -0.02em; }
+
+.section { padding: 0 var(--gutter); display: flex; flex-direction: column; gap: var(--s3); }
+.section + .section { margin-top: 22px; }
+.last { padding-bottom: var(--s5); }
+
+/* live group card */
+.live {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  padding: 20px;
+  border-radius: var(--r-card);
+  background: var(--ink);
+  box-shadow: var(--sh-ink);
+}
+.liveTop { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s3); }
+.liveTag { display: flex; align-items: center; gap: 7px; }
+.liveTagText {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--saffron);
+}
+.liveName { font-family: var(--font-display); font-weight: 700; font-size: 24px; color: var(--on-ink); letter-spacing: -0.02em; margin-top: 6px; }
+.liveSub { font-size: 13px; color: var(--on-ink-2); margin-top: 4px; }
+
+/* empty state when no group is running */
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: 22px 20px;
+  border-radius: var(--r-card);
+  border: 1.5px dashed var(--line);
+}
+.emptyTitle { font-family: var(--font-display); font-weight: 800; font-size: 26px; letter-spacing: var(--track-display); }
+
+/* cravings */
+.cravings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.craving {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 14px 12px;
+  border-radius: var(--r-card);
+  background: var(--cream-2);
+  text-align: left;
+  transition: transform 0.16s var(--ease), background 0.16s var(--ease);
+}
+.craving:hover { transform: translateY(-2px); background: #EBE1D5; }
+.cravingPhoto { height: 52px; }
+.cravingName { font-weight: 700; font-size: 13px; }
+
+.list { display: flex; flex-direction: column; gap: var(--s3); }
+
+.skeleton {
+  height: 100px;
+  border-radius: var(--r-card);
+  background: linear-gradient(90deg, #F2EAE0 25%, #EAE0D3 37%, #F2EAE0 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.3s linear infinite;
+}
+@keyframes shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+/* tablet+: the frame is fixed at 390px so the mobile rhythm holds;
+   only the craving grid loosens on very tall frames */
+@media (min-width: 768px) {
+  .cravings { gap: 10px; }
+}

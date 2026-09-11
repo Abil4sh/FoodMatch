@@ -1,0 +1,52 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  padding: var(--s2) var(--gutter) var(--s5);
+}
+
+.block { display: flex; flex-direction: column; gap: var(--s3); }
+
+.questionRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+
+.question {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.input {
+  width: 100%;
+  padding: 15px 16px;
+  border-radius: var(--r-btn);
+  border: 1.5px solid var(--line);
+  background: var(--cream);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  transition: border-color 0.16s var(--ease);
+}
+.input::placeholder { color: var(--muted-2); font-weight: 600; }
+.input:focus { border-color: var(--ink); outline: none; }
+.input:focus-visible { outline: none; }
+
+.suggestions { display: flex; flex-wrap: wrap; gap: var(--s2); }
+
+.chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+
+.note { font-size: 13px; color: var(--muted); }
+
+.footer {
+  padding: var(--s3) var(--gutter);
+  background: var(--cream);
+  border-top: 1px solid var(--hairline);
+}

@@ -1,0 +1,18 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 15px;
+  border-radius: var(--r-pill);
+  background: var(--cream-2);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.14s var(--ease), color 0.14s var(--ease);
+}
+.selectable { cursor: pointer; }
+.selectable:hover { background: #EBE1D5; }
+.on { background: var(--ink); color: var(--on-ink); font-weight: 700; }
+.on:hover { background: var(--ink-2); }
+.ghost { background: transparent; border: 1.5px solid var(--line); }

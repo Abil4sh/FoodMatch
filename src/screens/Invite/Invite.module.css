@@ -1,0 +1,84 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  padding: var(--s2) var(--gutter) var(--s5);
+}
+
+/* invite code card */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: 20px;
+  border-radius: var(--r-card);
+  background: var(--ink);
+  box-shadow: var(--sh-ink);
+}
+.cardTop { display: flex; flex-direction: column; gap: 4px; }
+.matchName {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  color: var(--on-ink);
+}
+
+.code {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding: 14px 16px;
+  border-radius: var(--r-btn);
+  border: 1.5px dashed var(--ink-line);
+  background: var(--ink-2);
+  transition: border-color 0.16s var(--ease);
+}
+.code:hover { border-color: var(--saffron); }
+.codeText {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: var(--track-mono);
+  color: var(--saffron);
+}
+.copy {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--on-ink-3);
+}
+
+/* friends */
+.listHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-top: var(--s2);
+}
+.listTitle { font-family: var(--font-display); font-weight: 700; font-size: 19px; letter-spacing: -0.02em; }
+
+.list { display: flex; flex-direction: column; gap: 10px; }
+
+.add {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--amber-ink);
+}
+
+.hint { font-size: 13px; color: var(--muted); }
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding: var(--s3) var(--gutter);
+  background: var(--cream);
+  border-top: 1px solid var(--hairline);
+}
+.footerNote { font-size: 12px; color: var(--muted); text-align: center; }

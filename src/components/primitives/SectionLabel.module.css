@@ -1,0 +1,25 @@
+.label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.onInk { color: var(--on-ink-2); }
+.accent { color: var(--amber-ink); }
+.saffron { color: var(--saffron); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+
+.headTitle {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* the inline action needs a real tap target, not just its text box */
+button.label {
+  padding: 6px 2px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+}

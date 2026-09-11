@@ -1,0 +1,35 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  padding: var(--s2) var(--gutter) var(--s5);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: 20px;
+  border-radius: var(--r-card);
+  background: var(--ink);
+  box-shadow: var(--sh-ink);
+}
+.top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s3); }
+.name {
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  letter-spacing: var(--track-display);
+  color: var(--on-ink);
+}
+.meta { margin-top: 3px; font-size: 13px; color: var(--on-ink-2); }
+.metaSmall {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--on-ink-3);
+}
+
+.actions { display: flex; flex-direction: column; gap: var(--s2); }
