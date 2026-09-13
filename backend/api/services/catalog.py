@@ -3,8 +3,8 @@
 This module is the *only* place the API reads catalog data from. Views never
 touch the filesystem or parse JSON themselves.
 
-That matters for what comes next: when Google Places is eventually introduced,
-a `google_places.py` service sits alongside this one and `get_restaurants` /
+That matters for what comes next: when a live places provider is introduced,
+a `geoapify_places.py` service sits alongside this one and `get_restaurants` /
 `get_restaurant` change where they source data from. Nothing in the views,
 serializers, or the React app has to change.
 

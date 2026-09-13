@@ -11,6 +11,8 @@ urlpatterns = [
     path("friends/", views.friends, name="friends"),
     path("cravings/", views.cravings, name="cravings"),
     path("restaurants/", views.restaurant_list, name="restaurant-list"),
+    # The only route that can reach a paid upstream API.
+    path("restaurants/search/", views.restaurant_search, name="restaurant-search"),
     path("restaurants/<str:restaurant_id>/", views.restaurant_detail, name="restaurant-detail"),
     path("dishes/", views.dish_list, name="dish-list"),
     path("dishes/<str:dish_id>/", views.dish_detail, name="dish-detail"),

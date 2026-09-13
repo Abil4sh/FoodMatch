@@ -27,10 +27,13 @@ TEST_HOSTS = ["testserver", "localhost", "127.0.0.1"]
 class CatalogEndpointTests(SimpleTestCase):
     """Endpoints return the data the React app needs."""
 
-    def test_health_reports_google_disabled(self):
+    def test_health_reports_the_provider_without_revealing_the_key(self):
         response = self.client.get("/api/health/")
         self.assertEqual(response.status_code, 200)
-        self.assertIs(response.json()["googleEnabled"], False)
+        body = response.json()
+        self.assertEqual(body["provider"], "geoapify")
+        # A boolean only: presence of a key, never any part of its value.
+        self.assertIsInstance(body["providerConfigured"], bool)
 
     def test_restaurant_list_succeeds(self):
         response = self.client.get("/api/restaurants/")
@@ -120,7 +123,7 @@ class ErrorHandlingTests(SimpleTestCase):
 class SecretExposureTests(SimpleTestCase):
     """No response may contain a credential or configuration value."""
 
-    FORBIDDEN = ("SECRET_KEY", "AIza", "GOOGLE_PLACES_API_KEY", "api_key", "password", "Bearer ")
+    FORBIDDEN = ("SECRET_KEY", "GEOAPIFY_API_KEY", "GOOGLE_PLACES_API_KEY", "AIza", "api_key", "password", "Bearer ")
 
     def test_responses_contain_no_secrets(self):
         for url in ("/api/health/", "/api/feed/", "/api/me/", "/api/friends/", "/api/restaurants/", "/api/dishes/"):
@@ -136,14 +139,52 @@ class SecretExposureTests(SimpleTestCase):
 
 
 @override_settings(ALLOWED_HOSTS=TEST_HOSTS)
-class NoGoogleTests(SimpleTestCase):
-    """This stage must have zero Google integration."""
+class ProviderBoundaryTests(SimpleTestCase):
+    """The outbound network boundary must stay exactly one file."""
 
-    def test_no_google_settings_exist(self):
+    def test_only_the_places_provider_may_import_urllib(self):
+        """The network boundary must stay a single file."""
+        import ast
+        import pathlib
+
+        api_dir = pathlib.Path(catalog.__file__).resolve().parent.parent
+        importers = []
+        for path in api_dir.rglob("*.py"):
+            if path.name.startswith("test"):
+                continue
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                names = []
+                if isinstance(node, ast.Import):
+                    names = [a.name for a in node.names]
+                elif isinstance(node, ast.ImportFrom):
+                    names = [node.module or ""]
+                if any(n.split(".")[0] == "urllib" for n in names):
+                    importers.append(path.name)
+
+        self.assertEqual(sorted(set(importers)), ["geoapify_places.py"], f"unexpected: {set(importers)}")
+
+    def test_no_provider_key_is_stored_in_django_settings(self):
+        """The key is read from the environment at call time and must never be
+        copied into settings, where it could reach a debug page."""
         from django.conf import settings
 
         for name in dir(settings):
-            self.assertNotIn("GOOGLE", name.upper(), f"unexpected Google setting: {name}")
+            if name.isupper() and ("GEOAPIFY" in name or "GOOGLE" in name):
+                self.fail(f"provider value stored in settings: {name}")
+
+    def test_no_google_integration_remains(self):
+        """Google was removed entirely; this stops it creeping back."""
+        import pathlib
+
+        api_dir = pathlib.Path(catalog.__file__).resolve().parent.parent
+        offenders = []
+        for path in api_dir.rglob("*.py"):
+            text = path.read_text(encoding="utf-8")
+            for needle in ("googleapis.com", "GOOGLE_PLACES_API_KEY", "google_places"):
+                if needle in text and path.name != "tests.py":
+                    offenders.append(f"{path.name}: {needle}")
+        self.assertEqual(offenders, [], f"Google integration found: {offenders}")
 
     def test_backend_modules_import_nothing_network_capable(self):
         """Parse the imports rather than grepping text, so prose in a comment
@@ -154,9 +195,14 @@ class NoGoogleTests(SimpleTestCase):
         banned = {"requests", "httpx", "urllib", "urllib3", "http", "socket", "aiohttp", "googlemaps", "google"}
         api_dir = pathlib.Path(catalog.__file__).resolve().parent.parent
 
+        # geoapify_places.py is the single sanctioned network boundary and is
+        # allowed urllib. Everything else in the api package must stay offline,
+        # which is what keeps that module the only way out to the internet.
+        exempt = {"geoapify_places.py"}
+
         offenders = []
         for path in api_dir.rglob("*.py"):
-            if path.name == "tests.py":
+            if path.name.startswith("test") or path.name in exempt:
                 continue
             tree = ast.parse(path.read_text(encoding="utf-8"))
             for node in ast.walk(tree):

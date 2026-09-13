@@ -28,6 +28,11 @@ RESTAURANT_FIELDS = (
     "tags",
     "hours",
     "address",
+    # Provider-sourced records carry coordinates and a source marker; local
+    # catalog records simply omit them, since _pick only copies present keys.
+    "lat",
+    "lon",
+    "source",
 )
 
 DISH_FIELDS = (

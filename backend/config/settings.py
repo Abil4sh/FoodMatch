@@ -107,12 +107,17 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "DEFAULT_AUTHENTICATION_CLASSES": [],
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
-    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.ScopedRateThrottle"],
+    # Views declare their own throttle classes; see api/views.py for why
+    # ScopedRateThrottle is deliberately not used.
+    "DEFAULT_THROTTLE_CLASSES": [],
     "DEFAULT_THROTTLE_RATES": {
         # Generous for a local prototype, but the ceiling exists now so the
         # architecture is already throttled before anything costly is added.
         "catalog": os.getenv("DJANGO_THROTTLE_CATALOG", "120/min"),
         "detail": os.getenv("DJANGO_THROTTLE_DETAIL", "60/min"),
+        # Deliberately the tightest scope: this is the only endpoint that can
+        # reach a paid upstream API, so it is the one worth rationing.
+        "search": os.getenv("DJANGO_THROTTLE_SEARCH", "15/min"),
     },
     "EXCEPTION_HANDLER": "api.views.safe_exception_handler",
 }

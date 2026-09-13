@@ -11,10 +11,12 @@ point already exists when something costly sits behind these handlers.
 
 from __future__ import annotations
 
+import logging
+
 from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
-from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import exception_handler
 
 from .serializers import (
@@ -25,13 +27,38 @@ from .serializers import (
     serialize_user,
 )
 from .services import catalog
-from .validation import ValidationError, validate_id, validate_limit
+from .services import restaurant_provider
+from .services.geoapify_places import ProviderError
+logger = logging.getLogger(__name__)
+
+from .validation import (
+    ValidationError,
+    validate_coordinates,
+    validate_id,
+    validate_limit,
+    validate_radius,
+    validate_search_limit,
+    validate_search_query,
+)
 
 
 def safe_exception_handler(exc, context):
     """Return clean JSON errors, never a traceback or a filesystem path."""
     if isinstance(exc, ValidationError):
         return Response({"error": "invalid_request", "detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+    if isinstance(exc, ProviderError):
+        # Controlled, code-only. The upstream body and the URL (which carries
+        # the key as a query parameter) are never forwarded to a client.
+        status_map = {
+            "not_configured": status.HTTP_503_SERVICE_UNAVAILABLE,
+            "rate_limited": status.HTTP_429_TOO_MANY_REQUESTS,
+            "category_not_allowed": status.HTTP_400_BAD_REQUEST,
+        }
+        return Response(
+            {"error": exc.code, "detail": "Restaurant search is unavailable right now."},
+            status=status_map.get(exc.code, status.HTTP_502_BAD_GATEWAY),
+        )
 
     if isinstance(exc, catalog.CatalogError):
         # The underlying exception mentions a path on disk; it is not forwarded.
@@ -51,12 +78,23 @@ def safe_exception_handler(exc, context):
     )
 
 
-class CatalogThrottle(ScopedRateThrottle):
+# NOTE: these subclass AnonRateThrottle, not ScopedRateThrottle. A
+# ScopedRateThrottle resolves its scope from a `throttle_scope` attribute on
+# the *view* and returns True (allow) when the view has none — so a class-level
+# `scope` here would have been silently inert and nothing would have been
+# throttled at all. Caught by a test that asserted a 429 and never got one.
+class CatalogThrottle(AnonRateThrottle):
     scope = "catalog"
 
 
-class DetailThrottle(ScopedRateThrottle):
+class DetailThrottle(AnonRateThrottle):
     scope = "detail"
+
+
+class SearchThrottle(AnonRateThrottle):
+    """Applied to the only endpoint that can reach a paid upstream API."""
+
+    scope = "search"
 
 
 def _limited(records, request, serializer):
@@ -68,17 +106,45 @@ def _limited(records, request, serializer):
 @throttle_classes([CatalogThrottle])
 def health(request):
     """Liveness probe. Reports no configuration values."""
-    return Response({"status": "ok", "service": "foodmatch-api", "googleEnabled": False})
+    # Reports only whether a provider key is present, never any part of it.
+    return Response(
+        {
+            "status": "ok",
+            "service": "foodmatch-api",
+            "provider": restaurant_provider.PROVIDER_NAME,
+            "providerConfigured": restaurant_provider.provider_configured(),
+        }
+    )
 
 
 @api_view(["GET"])
 @throttle_classes([CatalogThrottle])
 def feed(request):
-    """Everything the app needs on boot, in a single request."""
+    """Everything the app needs on boot, in a single request.
+
+    Restaurants come from the places provider when one is configured, and from
+    the bundled catalog otherwise. Dishes, cravings and the demo match stay
+    local: Geoapify returns no menu data, and inventing dishes would be
+    fabrication.
+
+    This is the frontend's only catalog request. Keeping it to one call on boot
+    is what stops the swipe deck, the detail screen and the profile from each
+    fetching on their own.
+    """
     data = catalog.get_feed()
+
+    outcome = restaurant_provider.search_restaurants(
+        query="",
+        latitude=None,
+        longitude=None,
+        radius_m=restaurant_provider.DEFAULT_RADIUS_M,
+        limit=restaurant_provider.DEFAULT_FEED_LIMIT,
+    )
+
     return Response(
         {
-            "restaurants": [serialize_restaurant(r) for r in data["restaurants"]],
+            "restaurants": [serialize_restaurant(r) for r in outcome["results"]],
+            "restaurantSource": outcome["source"],
             "dishes": [serialize_dish(d) for d in data["dishes"]],
             "cravings": [serialize_craving(c) for c in data["cravings"]],
             "activeMatch": data["activeMatch"],
@@ -143,3 +209,34 @@ def dish_detail(request, dish_id):
     if record is None:
         return Response({"error": "not_found", "detail": "Dish not found."}, status=status.HTTP_404_NOT_FOUND)
     return Response(serialize_dish(record))
+
+
+@api_view(["GET"])
+@throttle_classes([SearchThrottle])
+def restaurant_search(request):
+    """Search restaurants.
+
+    Uses the configured places provider when a key is present, and the bundled
+    catalog when it is not. Every parameter is validated and capped before the
+    provider is called, so a rejected request costs nothing upstream.
+
+    `source` in the response says which path served it.
+    """
+    query = validate_search_query(request.query_params.get("q"))
+    limit = validate_search_limit(request.query_params.get("limit"))
+    radius_m = validate_radius(request.query_params.get("radius"))
+    latitude, longitude = validate_coordinates(
+        request.query_params.get("lat"), request.query_params.get("lng")
+    )
+
+    outcome = restaurant_provider.search_restaurants(
+        query=query, latitude=latitude, longitude=longitude, radius_m=radius_m, limit=limit
+    )
+
+    payload = {
+        "source": outcome["source"],
+        "results": [serialize_restaurant(r) for r in outcome["results"]],
+    }
+    if outcome.get("reason"):
+        payload["reason"] = outcome["reason"]
+    return Response(payload)
