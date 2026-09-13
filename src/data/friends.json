@@ -1,0 +1,52 @@
+[
+  {
+    "id": "u_rahul",
+    "name": "Rahul",
+    "fullName": "Rahul Menon",
+    "initials": "R",
+    "color": "var(--av-2)",
+    "area": "Koramangala",
+    "status": "swiping",
+    "groupsShared": 6
+  },
+  {
+    "id": "u_ananya",
+    "name": "Ananya",
+    "fullName": "Ananya Rao",
+    "initials": "An",
+    "color": "var(--av-3)",
+    "area": "HSR Layout",
+    "status": "finished",
+    "groupsShared": 9
+  },
+  {
+    "id": "u_rohan",
+    "name": "Rohan",
+    "fullName": "Rohan Shetty",
+    "initials": "Ro",
+    "color": "var(--av-4)",
+    "area": "Indiranagar",
+    "status": "invited",
+    "groupsShared": 4
+  },
+  {
+    "id": "u_sneha",
+    "name": "Sneha",
+    "fullName": "Sneha Iyer",
+    "initials": "S",
+    "color": "var(--av-2)",
+    "area": "Koramangala",
+    "status": "none",
+    "groupsShared": 3
+  },
+  {
+    "id": "u_karthik",
+    "name": "Karthik",
+    "fullName": "Karthik Reddy",
+    "initials": "K",
+    "color": "var(--av-4)",
+    "area": "BTM Layout",
+    "status": "none",
+    "groupsShared": 2
+  }
+]

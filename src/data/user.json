@@ -1,0 +1,19 @@
+{
+  "id": "u_abilash",
+  "name": "Abilash",
+  "fullName": "Abilash Menon",
+  "initials": "A",
+  "color": "var(--av-1)",
+  "area": "HSR Layout",
+  "city": "Bengaluru",
+  "foodDNA": {
+    "topCuisines": [
+      "Ramen",
+      "Biryani",
+      "South Indian"
+    ],
+    "spice": 4,
+    "adventurous": 72,
+    "veg": false
+  }
+}

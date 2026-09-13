@@ -89,3 +89,15 @@
 @media (min-width: 768px) {
   .cravings { gap: 10px; }
 }
+
+/* Shown only when the Django API was unreachable and the bundled catalog was
+   used instead. Deliberately quiet: it is a status line, not an error. */
+.offlineNote {
+  margin: 0 var(--gutter) var(--s3);
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  background: var(--cream-2);
+  border: 1px dashed var(--line);
+  font-size: 12px;
+  color: var(--muted);
+}

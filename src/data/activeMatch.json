@@ -1,0 +1,16 @@
+{
+  "id": "g_friday_dinner",
+  "name": "Friday Dinner",
+  "area": "HSR Layout",
+  "code": "FM-7K2Q",
+  "when": "Tonight",
+  "memberIds": [
+    "u_abilash",
+    "u_rahul",
+    "u_ananya",
+    "u_rohan"
+  ],
+  "swipedCount": 3,
+  "deckRemaining": 12,
+  "status": "live"
+}

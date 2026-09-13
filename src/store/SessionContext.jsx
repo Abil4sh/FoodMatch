@@ -1,22 +1,24 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { api } from '../services/api';
+import { loadCatalog, SOURCE } from '../services/catalogSource';
 import { setCatalog } from '../services/catalogStore';
 
 const SessionContext = createContext(null);
 
 /*
- * Boots the app from the Django API.
+ * Boots the app once.
  *
- * Exactly three requests are made, once, on mount: the current user, the
- * catalog feed and the friends list. Nothing re-fetches on navigation, on
- * render, or on a swipe. `reload` exists only so the error state can offer a
- * manual retry — it is never called automatically, so a failing API cannot
- * turn into a retry loop.
+ * The catalog comes from Django when it is running and from the bundled JSON
+ * when it is not; `loadCatalog` decides and never rejects, so there is no
+ * error path that leaves the app empty. `dataSource` records which one was
+ * used, so the UI (and the tests) can tell them apart.
+ *
+ * `reload` is wired only to a manual control. Nothing retries on a timer.
  */
 export function SessionProvider({ children }) {
   const [state, setState] = useState({
     loading: true,
-    error: null,
+    dataSource: null,
+    sourceError: null,
     user: null,
     friends: [],
     restaurants: [],
@@ -27,36 +29,33 @@ export function SessionProvider({ children }) {
 
   const [attempt, setAttempt] = useState(0);
 
-  // React StrictMode invokes mount effects twice in development. Without this
-  // guard the boot fetch fired six times instead of three. The in-flight
-  // promise is cached per attempt so the second invocation reuses it rather
-  // than issuing a fresh set of requests — the doubling would be trivial here
-  // but unacceptable once a metered API sits behind this call.
+  // React StrictMode invokes mount effects twice in development. Caching the
+  // in-flight promise per attempt keeps that from doubling the boot requests.
   const inflight = useRef({ key: null, promise: null });
 
   useEffect(() => {
     let cancelled = false;
 
     if (inflight.current.key !== attempt) {
-      setState((s) => ({ ...s, loading: true, error: null }));
-      inflight.current = {
-        key: attempt,
-        promise: Promise.all([api.getMe(), api.getFeed(), api.getFriends()])
-      };
+      setState((s) => ({ ...s, loading: true }));
+      inflight.current = { key: attempt, promise: loadCatalog() };
     }
 
-    inflight.current.promise
-      .then(([user, feed, friends]) => {
-        if (cancelled) return;
-        // Park the catalog so synchronous lookups elsewhere need no request.
-        setCatalog({ restaurants: feed.restaurants, dishes: feed.dishes });
-        setState({ loading: false, error: null, user, friends, ...feed });
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        // One failure, one error state. No automatic retry, ever.
-        setState((s) => ({ ...s, loading: false, error: err?.message || 'Could not load FoodMatch.' }));
+    inflight.current.promise.then(({ source, user, feed, friends, error }) => {
+      if (cancelled) return;
+      // Park the catalog so synchronous lookups elsewhere need no request.
+      setCatalog({ restaurants: feed.restaurants, dishes: feed.dishes });
+      // Debug handle: the source name only, never any payload.
+      if (typeof window !== 'undefined') window.__FOODMATCH_DATA_SOURCE__ = source;
+      setState({
+        loading: false,
+        dataSource: source,
+        sourceError: error,
+        user,
+        friends,
+        ...feed
       });
+    });
 
     return () => {
       cancelled = true;
@@ -71,6 +70,7 @@ export function SessionProvider({ children }) {
       ...state,
       people,
       reload,
+      isLocalData: state.dataSource === SOURCE.LOCAL,
       getPerson: (id) => people.find((p) => p.id === id) || null
     };
   }, [state, reload]);

@@ -22,7 +22,7 @@ const page = await browser.newPage();
 await page.setViewport({ width: W, height: H, isMobile: W < 500, hasTouch: W < 500 });
 const errors = [];
 page.on('console', (m) => {
-  if (m.type() === 'error' && !/403|favicon|fonts\.googleapis/.test(m.text())) errors.push(m.text());
+  if (m.type() === 'error' && !/403|favicon|fonts\.googleapis|ERR_CONNECTION_REFUSED/.test(m.text())) errors.push(m.text());
 });
 page.on('pageerror', (e) => errors.push('PAGEERROR: ' + e.message));
 

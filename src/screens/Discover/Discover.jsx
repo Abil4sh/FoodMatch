@@ -14,7 +14,7 @@ import s from './Discover.module.css';
 
 export default function Discover() {
   const navigate = useNavigate();
-  const { loading, user, activeMatch, restaurants, cravings, getPerson } = useSession();
+  const { loading, user, activeMatch, restaurants, cravings, getPerson, isLocalData } = useSession();
   const { group, members: groupMembers, readyCount, readyPct } = useMatch();
 
   // A group the user built in this session outranks the seeded demo match.
@@ -36,6 +36,11 @@ export default function Discover() {
   return (
     <PhoneShell>
       <h1 className="srOnly">Discover</h1>
+      {isLocalData && (
+        <p className={s.offlineNote} role="status">
+          Showing bundled sample data &mdash; the FoodMatch API isn&rsquo;t running.
+        </p>
+      )}
       <div className={s.wrap}>
         <div className={s.top}>
           <div className={s.place}>

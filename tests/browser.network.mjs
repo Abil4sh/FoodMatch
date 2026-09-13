@@ -31,7 +31,7 @@ page.on('request', (r) => {
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => {
-  if (m.type() === 'error' && !/favicon|403|fonts\.(googleapis|gstatic)/.test(m.text())) errors.push(m.text());
+  if (m.type() === 'error' && !/favicon|403|fonts\.(googleapis|gstatic)|ERR_CONNECTION_REFUSED/.test(m.text())) errors.push(m.text());
 });
 
 const isApi = (u) => /^https?:\/\/(127\.0\.0\.1|localhost):8000\//.test(u);

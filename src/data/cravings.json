@@ -1,0 +1,32 @@
+[
+  {
+    "id": "c_biryani",
+    "label": "Biryani",
+    "cuisine": "Biryani"
+  },
+  {
+    "id": "c_ramen",
+    "label": "Ramen",
+    "cuisine": "Ramen"
+  },
+  {
+    "id": "c_dosa",
+    "label": "Dosa",
+    "cuisine": "South Indian"
+  },
+  {
+    "id": "c_pizza",
+    "label": "Pizza",
+    "cuisine": "Pizza"
+  },
+  {
+    "id": "c_kebab",
+    "label": "Kebab",
+    "cuisine": "Kebab"
+  },
+  {
+    "id": "c_cafe",
+    "label": "Cafe",
+    "cuisine": "Cafe"
+  }
+]
