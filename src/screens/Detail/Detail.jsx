@@ -8,7 +8,7 @@ import { MatchMeter } from '../../components/primitives/MatchMeter';
 import { FoodPhoto } from '../../components/swipe/FoodPhoto';
 import { useMatch } from '../../store/MatchContext';
 import { findCardById, dishesForRestaurant, venueFor, describe } from '../../services/catalog';
-import { has } from '../../services/fields';
+ const has = (value) => value !== null && value !== undefined && value !== '';
 import { openDirections, directionsUrl } from '../../services/maps';
 import s from './Detail.module.css';
 
