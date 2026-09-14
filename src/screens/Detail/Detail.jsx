@@ -8,6 +8,8 @@ import { MatchMeter } from '../../components/primitives/MatchMeter';
 import { FoodPhoto } from '../../components/swipe/FoodPhoto';
 import { useMatch } from '../../store/MatchContext';
 import { findCardById, dishesForRestaurant, venueFor, describe } from '../../services/catalog';
+import { has } from '../../services/fields';
+import { openDirections, directionsUrl } from '../../services/maps';
 import s from './Detail.module.css';
 
 export default function Detail() {
@@ -57,11 +59,23 @@ export default function Detail() {
           </div>
         </div>
 
-        <div className={s.facts}>
-          <Fact label="Rating" value={'\u2605 ' + card.rating} />
-          <Fact label="Distance" value={card.distanceKm + ' km'} />
-          <Fact label={isDish ? 'Price' : 'For two'} value={'\u20B9' + (isDish ? card.price : card.priceForTwo)} />
-        </div>
+{(() => {
+          // Only render facts the record actually has.
+          const price = isDish ? card.price : card.priceForTwo;
+          const facts = [
+            has(card.rating) && { label: 'Rating', value: '\u2605 ' + card.rating },
+            has(card.distanceKm) && { label: 'Distance', value: card.distanceKm + ' km' },
+            has(price) && { label: isDish ? 'Price' : 'For two', value: '\u20B9' + price }
+          ].filter(Boolean);
+          if (facts.length === 0) return null;
+          return (
+            <div className={s.facts}>
+              {facts.map((f) => (
+                <Fact key={f.label} label={f.label} value={f.value} />
+              ))}
+            </div>
+          );
+        })()}
 
         {scored && (
           <section className={s.matchBox}>
@@ -108,7 +122,8 @@ export default function Detail() {
                     <span className={s.menuText}>
                       <span className={s.menuName}>{d.name}</span>
                       <span className={s.menuMeta}>
-                        &#9733; {d.rating} &middot; {d.veg ? 'Veg' : 'Non-veg'}
+                        {has(d.rating) ? '\u2605 ' + d.rating + ' \u00B7 ' : ''}
+                        {d.veg ? 'Veg' : 'Non-veg'}
                       </span>
                     </span>
                     <span className={s.menuPrice}>&#8377;{d.price}</span>
@@ -120,13 +135,13 @@ export default function Detail() {
         )}
 
         <div className={s.actions}>
-          {/* Placeholder until a maps provider is wired up in a later milestone. */}
-          <Button
-            variant="outline"
-            onClick={() => window.alert('Directions open in a maps app once FoodMatch is connected to one.')}
-          >
-            Directions
-          </Button>
+          {/* For a dish, route to the restaurant that serves it. Hidden when a
+              record has no location at all, rather than opening a blank map. */}
+          {directionsUrl(venue || card) && (
+            <Button variant="outline" onClick={() => openDirections(venue || card)}>
+              Directions
+            </Button>
+          )}
           <Button onClick={() => navigate('/create')}>Start another FoodMatch</Button>
         </div>
       </div>
