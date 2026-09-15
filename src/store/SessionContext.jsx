@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { loadCatalog, SOURCE } from '../services/catalogSource';
+import { loadCatalog, SOURCE, referenceRestaurants } from '../services/catalogSource';
 import { setCatalog } from '../services/catalogStore';
+import { readLocation, writeLocation, toStoredLocation } from '../services/location';
 
 const SessionContext = createContext(null);
 
@@ -27,6 +28,8 @@ export function SessionProvider({ children }) {
     activeMatch: null
   });
 
+  // Read synchronously so the header never flashes the wrong area.
+  const [location, setLocationState] = useState(readLocation);
   const [attempt, setAttempt] = useState(0);
 
   // React StrictMode invokes mount effects twice in development. Caching the
@@ -36,15 +39,24 @@ export function SessionProvider({ children }) {
   useEffect(() => {
     let cancelled = false;
 
-    if (inflight.current.key !== attempt) {
+    // Keyed on the area too: choosing a new one refetches the feed exactly
+    // once. Nothing else in the app triggers a catalog request.
+    const key = attempt + '|' + location.latitude + ',' + location.longitude;
+    if (inflight.current.key !== key) {
       setState((s) => ({ ...s, loading: true }));
-      inflight.current = { key: attempt, promise: loadCatalog() };
+      inflight.current = { key, promise: loadCatalog(location) };
     }
 
     inflight.current.promise.then(({ source, user, feed, friends, error }) => {
       if (cancelled) return;
       // Park the catalog so synchronous lookups elsewhere need no request.
-      setCatalog({ restaurants: feed.restaurants, dishes: feed.dishes });
+      // `reference` keeps the curated restaurants resolvable by id even when
+      // the deck is live provider data, so a dish can find its parent.
+      setCatalog({
+        restaurants: feed.restaurants,
+        dishes: feed.dishes,
+        reference: referenceRestaurants()
+      });
       // Debug handle: the source name only, never any payload.
       if (typeof window !== 'undefined') window.__FOODMATCH_DATA_SOURCE__ = source;
       setState({
@@ -60,20 +72,31 @@ export function SessionProvider({ children }) {
     return () => {
       cancelled = true;
     };
-  }, [attempt]);
+  }, [attempt, location]);
 
   const reload = useCallback(() => setAttempt((n) => n + 1), []);
+
+  /** Changing the area persists it and refetches the feed once. */
+  const setLocation = useCallback((next) => {
+    const stored = toStoredLocation(next);
+    if (!stored) return false;
+    writeLocation(stored);
+    setLocationState(stored);
+    return true;
+  }, []);
 
   const value = useMemo(() => {
     const people = state.user ? [state.user, ...state.friends] : state.friends;
     return {
       ...state,
       people,
+      location,
+      setLocation,
       reload,
       isLocalData: state.dataSource === SOURCE.LOCAL,
       getPerson: (id) => people.find((p) => p.id === id) || null
     };
-  }, [state, reload]);
+  }, [state, location, setLocation, reload]);
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

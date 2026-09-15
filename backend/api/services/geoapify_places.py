@@ -32,9 +32,16 @@ import urllib.request
 logger = logging.getLogger(__name__)
 
 PLACES_URL = "https://api.geoapify.com/v2/places"
+AUTOCOMPLETE_URL = "https://api.geoapify.com/v1/geocode/autocomplete"
 
 # Allowlist. A caller cannot supply an arbitrary category, let alone a URL.
 ALLOWED_CATEGORIES = frozenset({"catering.restaurant"})
+
+# Bengaluru, used to bias location search so "Indiranagar" resolves locally
+# rather than to a same-named place elsewhere.
+CITY_BIAS_LAT = 12.9716
+CITY_BIAS_LON = 77.5946
+MAX_LOCATION_RESULTS = 8
 DEFAULT_CATEGORY = "catering.restaurant"
 
 # Hard caps, applied again here even though the view validates first: this
@@ -260,3 +267,82 @@ def search_restaurants(*, latitude: float, longitude: float, radius_m: int, limi
 
     _cache_put(cache_key, results)
     return results
+
+
+# --- location search --------------------------------------------------------
+
+
+def to_location(result: dict) -> dict | None:
+    """Map one Geoapify geocoding result onto a FoodMatch location.
+
+    The Address Autocomplete API returns flat objects when `format=json`, each
+    with lat/lon and address components. We keep the smallest representation
+    the app needs: a label, coordinates and a stable id.
+    """
+    if not isinstance(result, dict):
+        return None
+    lat, lon = result.get("lat"), result.get("lon")
+    if not isinstance(lat, (int, float)) or not isinstance(lon, (int, float)):
+        return None
+
+    # Prefer the most specific locality name Geoapify resolved.
+    name = (
+        result.get("suburb")
+        or result.get("district")
+        or result.get("neighbourhood")
+        or result.get("city")
+        or result.get("name")
+        or result.get("address_line1")
+    )
+    if not name:
+        return None
+
+    context = [part for part in (result.get("city"), result.get("state")) if part and part != name]
+
+    return {
+        "id": str(result.get("place_id") or f"{lat:.5f},{lon:.5f}"),
+        "name": name,
+        "context": ", ".join(context),
+        "latitude": round(float(lat), 6),
+        "longitude": round(float(lon), 6),
+        "source": "geoapify",
+    }
+
+
+def search_locations(*, text: str, limit: int = MAX_LOCATION_RESULTS) -> list[dict]:
+    """One Address Autocomplete call, biased to Bengaluru and filtered to India."""
+    if not is_configured():
+        raise NotConfigured()
+
+    limit = max(1, min(int(limit), MAX_LOCATION_RESULTS))
+    cache_key = f"locations:{text.casefold()}:{limit}"
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        return cached
+
+    params = {
+        "text": text,
+        "format": "json",
+        "limit": str(limit),
+        "filter": "countrycode:in",
+        "bias": f"proximity:{CITY_BIAS_LON},{CITY_BIAS_LAT}",
+        "apiKey": _api_key(),
+    }
+    url = AUTOCOMPLETE_URL + "?" + urllib.parse.urlencode(params)
+
+    body = _get_json(url)
+    raw = body.get("results") if isinstance(body, dict) else None
+    results = [loc for loc in (to_location(r) for r in (raw or [])) if loc]
+
+    # Geoapify can return several nodes for one locality; keep the first of each.
+    seen = set()
+    unique = []
+    for location in results:
+        key = location["name"].casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(location)
+
+    _cache_put(cache_key, unique[:limit])
+    return unique[:limit]

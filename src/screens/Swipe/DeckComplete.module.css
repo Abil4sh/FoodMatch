@@ -68,3 +68,12 @@
 }
 
 .actions { display: flex; flex-direction: column; gap: var(--s2); }
+
+.friendAvatar {
+  width: 30px; height: 30px;
+  border-radius: var(--r-pill);
+  background: var(--grad-saffron);
+  color: var(--ink);
+  display: grid; place-items: center;
+  font-weight: 800; font-size: 12px; flex: none;
+}

@@ -14,7 +14,8 @@
     "cuisines": [
       "Japanese"
     ],
-    "veg": false
+    "veg": false,
+    "isApproximate": true
   },
   {
     "id": "d_ghee_dosa",
@@ -31,7 +32,8 @@
     "cuisines": [
       "South Indian"
     ],
-    "veg": true
+    "veg": true,
+    "isApproximate": true
   },
   {
     "id": "d_mutton_biryani",
@@ -48,7 +50,8 @@
     "cuisines": [
       "Hyderabadi"
     ],
-    "veg": false
+    "veg": false,
+    "isApproximate": true
   },
   {
     "id": "d_galouti",
@@ -65,7 +68,8 @@
     "cuisines": [
       "Awadhi"
     ],
-    "veg": false
+    "veg": false,
+    "isApproximate": true
   },
   {
     "id": "d_filter_flan",
@@ -82,7 +86,8 @@
     "cuisines": [
       "Cafe"
     ],
-    "veg": true
+    "veg": true,
+    "isApproximate": true
   },
   {
     "id": "d_paneer_thali",
@@ -99,7 +104,8 @@
     "cuisines": [
       "North Indian"
     ],
-    "veg": true
+    "veg": true,
+    "isApproximate": true
   },
   {
     "id": "d_chilli_garlic_noodles",
@@ -116,7 +122,8 @@
     "cuisines": [
       "Chinese"
     ],
-    "veg": true
+    "veg": true,
+    "isApproximate": true
   },
   {
     "id": "d_margherita",
@@ -133,7 +140,8 @@
     "cuisines": [
       "Pizza"
     ],
-    "veg": true
+    "veg": true,
+    "isApproximate": true
   },
   {
     "id": "d_andhra_biryani",
@@ -150,7 +158,8 @@
     "cuisines": [
       "Andhra"
     ],
-    "veg": false
+    "veg": false,
+    "isApproximate": true
   },
   {
     "id": "d_ol_fashioned",
@@ -167,7 +176,8 @@
     "cuisines": [
       "American"
     ],
-    "veg": false
+    "veg": false,
+    "isApproximate": true
   },
   {
     "id": "d_khow_suey",
@@ -184,7 +194,8 @@
     "cuisines": [
       "Burmese"
     ],
-    "veg": true
+    "veg": true,
+    "isApproximate": true
   },
   {
     "id": "d_shawarma",
@@ -201,6 +212,655 @@
     "cuisines": [
       "Middle Eastern"
     ],
-    "veg": false
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_ramen_house_spicy_miso_ramen",
+    "type": "dish",
+    "name": "Spicy Miso Ramen",
+    "restaurantId": "r_ramen_house",
+    "restaurantName": "Ramen House",
+    "area": "Koramangala 5th Block",
+    "price": 420,
+    "rating": 4.5,
+    "distanceKm": 1.2,
+    "etaMin": 26,
+    "photoLabel": "SPICY MISO RAMEN — PLATED",
+    "cuisines": [
+      "Japanese"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_ramen_house_gyoza",
+    "type": "dish",
+    "name": "Gyoza",
+    "restaurantId": "r_ramen_house",
+    "restaurantName": "Ramen House",
+    "area": "Koramangala 5th Block",
+    "price": 240,
+    "rating": 4.5,
+    "distanceKm": 1.2,
+    "etaMin": 26,
+    "photoLabel": "GYOZA — PLATED",
+    "cuisines": [
+      "Japanese"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_ramen_house_chicken_karaage",
+    "type": "dish",
+    "name": "Chicken Karaage",
+    "restaurantId": "r_ramen_house",
+    "restaurantName": "Ramen House",
+    "area": "Koramangala 5th Block",
+    "price": 320,
+    "rating": 4.5,
+    "distanceKm": 1.2,
+    "etaMin": 26,
+    "photoLabel": "CHICKEN KARAAGE — PLATED",
+    "cuisines": [
+      "Japanese"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_biryani_adda_mutton_dum_biryani",
+    "type": "dish",
+    "name": "Mutton Dum Biryani",
+    "restaurantId": "r_biryani_adda",
+    "restaurantName": "Biryani Adda",
+    "area": "Indiranagar",
+    "price": 420,
+    "rating": 4.4,
+    "distanceKm": 2.4,
+    "etaMin": 34,
+    "photoLabel": "MUTTON DUM BIRYANI — PLATED",
+    "cuisines": [
+      "Hyderabadi"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_biryani_adda_chicken_65",
+    "type": "dish",
+    "name": "Chicken 65",
+    "restaurantId": "r_biryani_adda",
+    "restaurantName": "Biryani Adda",
+    "area": "Indiranagar",
+    "price": 260,
+    "rating": 4.4,
+    "distanceKm": 2.4,
+    "etaMin": 34,
+    "photoLabel": "CHICKEN 65 — PLATED",
+    "cuisines": [
+      "Hyderabadi"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_biryani_adda_double_ka_meetha",
+    "type": "dish",
+    "name": "Double Ka Meetha",
+    "restaurantId": "r_biryani_adda",
+    "restaurantName": "Biryani Adda",
+    "area": "Indiranagar",
+    "price": 150,
+    "rating": 4.4,
+    "distanceKm": 2.4,
+    "etaMin": 34,
+    "photoLabel": "DOUBLE KA MEETHA — PLATED",
+    "cuisines": [
+      "Hyderabadi"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_dosa_diaries_masala_dosa",
+    "type": "dish",
+    "name": "Masala Dosa",
+    "restaurantId": "r_dosa_diaries",
+    "restaurantName": "Dosa Diaries",
+    "area": "HSR Layout",
+    "price": 120,
+    "rating": 4.6,
+    "distanceKm": 0.8,
+    "etaMin": 18,
+    "photoLabel": "MASALA DOSA — PLATED",
+    "cuisines": [
+      "South Indian"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_dosa_diaries_rava_idli",
+    "type": "dish",
+    "name": "Rava Idli",
+    "restaurantId": "r_dosa_diaries",
+    "restaurantName": "Dosa Diaries",
+    "area": "HSR Layout",
+    "price": 90,
+    "rating": 4.6,
+    "distanceKm": 0.8,
+    "etaMin": 18,
+    "photoLabel": "RAVA IDLI — PLATED",
+    "cuisines": [
+      "South Indian"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_dosa_diaries_filter_coffee",
+    "type": "dish",
+    "name": "Filter Coffee",
+    "restaurantId": "r_dosa_diaries",
+    "restaurantName": "Dosa Diaries",
+    "area": "HSR Layout",
+    "price": 50,
+    "rating": 4.6,
+    "distanceKm": 0.8,
+    "etaMin": 18,
+    "photoLabel": "FILTER COFFEE — PLATED",
+    "cuisines": [
+      "South Indian"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_kebab_kothi_galouti_kebab",
+    "type": "dish",
+    "name": "Galouti Kebab",
+    "restaurantId": "r_kebab_kothi",
+    "restaurantName": "Kebab Kothi",
+    "area": "Koramangala 8th Block",
+    "price": 420,
+    "rating": 4.3,
+    "distanceKm": 3.1,
+    "etaMin": 29,
+    "photoLabel": "GALOUTI KEBAB — PLATED",
+    "cuisines": [
+      "Awadhi"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_kebab_kothi_paneer_tikka",
+    "type": "dish",
+    "name": "Paneer Tikka",
+    "restaurantId": "r_kebab_kothi",
+    "restaurantName": "Kebab Kothi",
+    "area": "Koramangala 8th Block",
+    "price": 320,
+    "rating": 4.3,
+    "distanceKm": 3.1,
+    "etaMin": 29,
+    "photoLabel": "PANEER TIKKA — PLATED",
+    "cuisines": [
+      "Awadhi"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_kebab_kothi_roomali_roti",
+    "type": "dish",
+    "name": "Roomali Roti",
+    "restaurantId": "r_kebab_kothi",
+    "restaurantName": "Kebab Kothi",
+    "area": "Koramangala 8th Block",
+    "price": 60,
+    "rating": 4.3,
+    "distanceKm": 3.1,
+    "etaMin": 29,
+    "photoLabel": "ROOMALI ROTI — PLATED",
+    "cuisines": [
+      "Awadhi"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_nomad_bakehouse_sourdough_toastie",
+    "type": "dish",
+    "name": "Sourdough Toastie",
+    "restaurantId": "r_nomad_bakehouse",
+    "restaurantName": "Nomad Bakehouse",
+    "area": "Indiranagar",
+    "price": 290,
+    "rating": 4.7,
+    "distanceKm": 2.8,
+    "etaMin": 31,
+    "photoLabel": "SOURDOUGH TOASTIE — PLATED",
+    "cuisines": [
+      "Cafe"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_nomad_bakehouse_cold_brew",
+    "type": "dish",
+    "name": "Cold Brew",
+    "restaurantId": "r_nomad_bakehouse",
+    "restaurantName": "Nomad Bakehouse",
+    "area": "Indiranagar",
+    "price": 220,
+    "rating": 4.7,
+    "distanceKm": 2.8,
+    "etaMin": 31,
+    "photoLabel": "COLD BREW — PLATED",
+    "cuisines": [
+      "Cafe"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_nomad_bakehouse_basque_cheesecake",
+    "type": "dish",
+    "name": "Basque Cheesecake",
+    "restaurantId": "r_nomad_bakehouse",
+    "restaurantName": "Nomad Bakehouse",
+    "area": "Indiranagar",
+    "price": 340,
+    "rating": 4.7,
+    "distanceKm": 2.8,
+    "etaMin": 31,
+    "photoLabel": "BASQUE CHEESECAKE — PLATED",
+    "cuisines": [
+      "Cafe"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_thali_theory_north_indian_thali",
+    "type": "dish",
+    "name": "North Indian Thali",
+    "restaurantId": "r_thali_theory",
+    "restaurantName": "Thali Theory",
+    "area": "BTM Layout",
+    "price": 320,
+    "rating": 4.2,
+    "distanceKm": 3.6,
+    "etaMin": 33,
+    "photoLabel": "NORTH INDIAN THALI — PLATED",
+    "cuisines": [
+      "North Indian"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_thali_theory_dal_makhani",
+    "type": "dish",
+    "name": "Dal Makhani",
+    "restaurantId": "r_thali_theory",
+    "restaurantName": "Thali Theory",
+    "area": "BTM Layout",
+    "price": 260,
+    "rating": 4.2,
+    "distanceKm": 3.6,
+    "etaMin": 33,
+    "photoLabel": "DAL MAKHANI — PLATED",
+    "cuisines": [
+      "North Indian"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_thali_theory_gulab_jamun",
+    "type": "dish",
+    "name": "Gulab Jamun",
+    "restaurantId": "r_thali_theory",
+    "restaurantName": "Thali Theory",
+    "area": "BTM Layout",
+    "price": 120,
+    "rating": 4.2,
+    "distanceKm": 3.6,
+    "etaMin": 33,
+    "photoLabel": "GULAB JAMUN — PLATED",
+    "cuisines": [
+      "North Indian"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_wok_lane_chilli_garlic_noodles",
+    "type": "dish",
+    "name": "Chilli Garlic Noodles",
+    "restaurantId": "r_wok_lane",
+    "restaurantName": "Wok Lane",
+    "area": "Sarjapur Road",
+    "price": 280,
+    "rating": 4.1,
+    "distanceKm": 4,
+    "etaMin": 38,
+    "photoLabel": "CHILLI GARLIC NOODLES — PLATED",
+    "cuisines": [
+      "Chinese"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_wok_lane_dim_sum_basket",
+    "type": "dish",
+    "name": "Dim Sum Basket",
+    "restaurantId": "r_wok_lane",
+    "restaurantName": "Wok Lane",
+    "area": "Sarjapur Road",
+    "price": 320,
+    "rating": 4.1,
+    "distanceKm": 4,
+    "etaMin": 38,
+    "photoLabel": "DIM SUM BASKET — PLATED",
+    "cuisines": [
+      "Chinese"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_wok_lane_kung_pao_chicken",
+    "type": "dish",
+    "name": "Kung Pao Chicken",
+    "restaurantId": "r_wok_lane",
+    "restaurantName": "Wok Lane",
+    "area": "Sarjapur Road",
+    "price": 360,
+    "rating": 4.1,
+    "distanceKm": 4,
+    "etaMin": 38,
+    "photoLabel": "KUNG PAO CHICKEN — PLATED",
+    "cuisines": [
+      "Chinese"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_pizza_pilgrim_margherita",
+    "type": "dish",
+    "name": "Margherita",
+    "restaurantId": "r_pizza_pilgrim",
+    "restaurantName": "Slice Society",
+    "area": "HSR Layout",
+    "price": 380,
+    "rating": 4.4,
+    "distanceKm": 1.5,
+    "etaMin": 24,
+    "photoLabel": "MARGHERITA — PLATED",
+    "cuisines": [
+      "Pizza"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_pizza_pilgrim_diavola",
+    "type": "dish",
+    "name": "Diavola",
+    "restaurantId": "r_pizza_pilgrim",
+    "restaurantName": "Slice Society",
+    "area": "HSR Layout",
+    "price": 460,
+    "rating": 4.4,
+    "distanceKm": 1.5,
+    "etaMin": 24,
+    "photoLabel": "DIAVOLA — PLATED",
+    "cuisines": [
+      "Pizza"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_pizza_pilgrim_tiramisu",
+    "type": "dish",
+    "name": "Tiramisu",
+    "restaurantId": "r_pizza_pilgrim",
+    "restaurantName": "Slice Society",
+    "area": "HSR Layout",
+    "price": 280,
+    "rating": 4.4,
+    "distanceKm": 1.5,
+    "etaMin": 24,
+    "photoLabel": "TIRAMISU — PLATED",
+    "cuisines": [
+      "Pizza"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_meghana_chicken_biryani",
+    "type": "dish",
+    "name": "Chicken Biryani",
+    "restaurantId": "r_meghana",
+    "restaurantName": "Meghana Foods",
+    "area": "Residency Road",
+    "price": 390,
+    "rating": 4.5,
+    "distanceKm": 5.2,
+    "etaMin": 41,
+    "photoLabel": "CHICKEN BIRYANI — PLATED",
+    "cuisines": [
+      "Andhra"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_meghana_andhra_chilli_chicken",
+    "type": "dish",
+    "name": "Andhra Chilli Chicken",
+    "restaurantId": "r_meghana",
+    "restaurantName": "Meghana Foods",
+    "area": "Residency Road",
+    "price": 330,
+    "rating": 4.5,
+    "distanceKm": 5.2,
+    "etaMin": 41,
+    "photoLabel": "ANDHRA CHILLI CHICKEN — PLATED",
+    "cuisines": [
+      "Andhra"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_meghana_ragi_mudde",
+    "type": "dish",
+    "name": "Ragi Mudde",
+    "restaurantId": "r_meghana",
+    "restaurantName": "Meghana Foods",
+    "area": "Residency Road",
+    "price": 140,
+    "rating": 4.5,
+    "distanceKm": 5.2,
+    "etaMin": 41,
+    "photoLabel": "RAGI MUDDE — PLATED",
+    "cuisines": [
+      "Andhra"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_truffles_chicken_steak",
+    "type": "dish",
+    "name": "Chicken Steak",
+    "restaurantId": "r_truffles",
+    "restaurantName": "Truffles",
+    "area": "Koramangala 4th Block",
+    "price": 420,
+    "rating": 4.4,
+    "distanceKm": 2.1,
+    "etaMin": 28,
+    "photoLabel": "CHICKEN STEAK — PLATED",
+    "cuisines": [
+      "American"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_truffles_loaded_fries",
+    "type": "dish",
+    "name": "Loaded Fries",
+    "restaurantId": "r_truffles",
+    "restaurantName": "Truffles",
+    "area": "Koramangala 4th Block",
+    "price": 240,
+    "rating": 4.4,
+    "distanceKm": 2.1,
+    "etaMin": 28,
+    "photoLabel": "LOADED FRIES — PLATED",
+    "cuisines": [
+      "American"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_truffles_chocolate_shake",
+    "type": "dish",
+    "name": "Chocolate Shake",
+    "restaurantId": "r_truffles",
+    "restaurantName": "Truffles",
+    "area": "Koramangala 4th Block",
+    "price": 220,
+    "rating": 4.4,
+    "distanceKm": 2.1,
+    "etaMin": 28,
+    "photoLabel": "CHOCOLATE SHAKE — PLATED",
+    "cuisines": [
+      "American"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_burma_burma_tea_leaf_salad",
+    "type": "dish",
+    "name": "Tea Leaf Salad",
+    "restaurantId": "r_burma_burma",
+    "restaurantName": "Burma Burma",
+    "area": "Indiranagar",
+    "price": 380,
+    "rating": 4.6,
+    "distanceKm": 3.4,
+    "etaMin": 35,
+    "photoLabel": "TEA LEAF SALAD — PLATED",
+    "cuisines": [
+      "Burmese"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_burma_burma_bun_cha_kyaw",
+    "type": "dish",
+    "name": "Bun Cha Kyaw",
+    "restaurantId": "r_burma_burma",
+    "restaurantName": "Burma Burma",
+    "area": "Indiranagar",
+    "price": 340,
+    "rating": 4.6,
+    "distanceKm": 3.4,
+    "etaMin": 35,
+    "photoLabel": "BUN CHA KYAW — PLATED",
+    "cuisines": [
+      "Burmese"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_burma_burma_burmese_falooda",
+    "type": "dish",
+    "name": "Burmese Falooda",
+    "restaurantId": "r_burma_burma",
+    "restaurantName": "Burma Burma",
+    "area": "Indiranagar",
+    "price": 260,
+    "rating": 4.6,
+    "distanceKm": 3.4,
+    "etaMin": 35,
+    "photoLabel": "BURMESE FALOODA — PLATED",
+    "cuisines": [
+      "Burmese"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_leon_grill_chicken_shawarma_plate",
+    "type": "dish",
+    "name": "Chicken Shawarma Plate",
+    "restaurantId": "r_leon_grill",
+    "restaurantName": "Leon Grill",
+    "area": "Koramangala 6th Block",
+    "price": 260,
+    "rating": 4.3,
+    "distanceKm": 2.7,
+    "etaMin": 25,
+    "photoLabel": "CHICKEN SHAWARMA PLATE — PLATED",
+    "cuisines": [
+      "Middle Eastern"
+    ],
+    "veg": false,
+    "isApproximate": true
+  },
+  {
+    "id": "d_leon_grill_falafel_wrap",
+    "type": "dish",
+    "name": "Falafel Wrap",
+    "restaurantId": "r_leon_grill",
+    "restaurantName": "Leon Grill",
+    "area": "Koramangala 6th Block",
+    "price": 150,
+    "rating": 4.3,
+    "distanceKm": 2.7,
+    "etaMin": 25,
+    "photoLabel": "FALAFEL WRAP — PLATED",
+    "cuisines": [
+      "Middle Eastern"
+    ],
+    "veg": true,
+    "isApproximate": true
+  },
+  {
+    "id": "d_leon_grill_grilled_chicken_quarter",
+    "type": "dish",
+    "name": "Grilled Chicken Quarter",
+    "restaurantId": "r_leon_grill",
+    "restaurantName": "Leon Grill",
+    "area": "Koramangala 6th Block",
+    "price": 220,
+    "rating": 4.3,
+    "distanceKm": 2.7,
+    "etaMin": 25,
+    "photoLabel": "GRILLED CHICKEN QUARTER — PLATED",
+    "cuisines": [
+      "Middle Eastern"
+    ],
+    "veg": false,
+    "isApproximate": true
   }
 ]

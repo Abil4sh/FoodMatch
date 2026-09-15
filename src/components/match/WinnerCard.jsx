@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { FoodPhoto } from '../swipe/FoodPhoto';
 import { Avatar } from '../primitives/Avatar';
+import { factList, ratingText, distanceText, priceForTwoText, priceText } from '../../services/fields';
 import s from './WinnerCard.module.css';
 
 export function WinnerCard({ result, people = [], delay = 0, onOpen }) {
@@ -35,13 +36,24 @@ export function WinnerCard({ result, people = [], delay = 0, onOpen }) {
         <p className={s.sub}>
           {isDish ? card.restaurantName : card.cuisines?.[0]} &middot; {card.area}
         </p>
-        <div className={s.facts}>
-          <span className={s.rating}>&#9733; {card.rating}</span>
-          <span className={s.dot} />
-          <span>{card.distanceKm} km</span>
-          <span className={s.dot} />
-          <span>{isDish ? '\u20B9' + card.price : '\u20B9' + card.priceForTwo + ' for two'}</span>
-        </div>
+        {(() => {
+          const facts = factList(
+            ratingText(card.rating),
+            distanceText(card.distanceKm),
+            isDish ? priceText(card.price) : priceForTwoText(card.priceForTwo)
+          );
+          if (facts.length === 0) return null;
+          return (
+            <div className={s.facts}>
+              {facts.map((text, i) => (
+                <span key={text} className={s.factItem}>
+                  {i > 0 && <span className={s.dot} />}
+                  <span className={String(text).startsWith('\u2605') ? s.rating : undefined}>{text}</span>
+                </span>
+              ))}
+            </div>
+          );
+        })()}
 
         <div className={s.liked}>
           <div className={s.avatars}>

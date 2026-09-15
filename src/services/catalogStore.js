@@ -7,10 +7,15 @@
 // This is the mechanism that keeps request volume flat: rendering a hundred
 // cards reads from this object a hundred times and calls the API zero times.
 
-let catalog = { restaurants: [], dishes: [], ready: false };
+let catalog = { restaurants: [], dishes: [], reference: [], ready: false };
 
-export function setCatalog({ restaurants = [], dishes = [] } = {}) {
-  catalog = { restaurants, dishes, ready: true };
+/**
+ * @param restaurants the deck, which may be live provider results
+ * @param reference   the curated catalog, always kept for id lookups so a dish
+ *   can still resolve its parent restaurant when the deck is live data
+ */
+export function setCatalog({ restaurants = [], dishes = [], reference = [] } = {}) {
+  catalog = { restaurants, dishes, reference, ready: true };
 }
 
 export function getCatalog() {
@@ -23,5 +28,5 @@ export function isCatalogReady() {
 
 // Test helper; not used by the app.
 export function resetCatalog() {
-  catalog = { restaurants: [], dishes: [], ready: false };
+  catalog = { restaurants: [], dishes: [], reference: [], ready: false };
 }

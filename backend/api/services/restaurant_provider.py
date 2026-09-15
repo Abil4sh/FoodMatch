@@ -40,6 +40,40 @@ def provider_configured() -> bool:
     return geoapify_places.is_configured()
 
 
+def popular_areas(limit: int = 8) -> list[dict]:
+    """The curated shortcut list shown before the user types anything."""
+    return [{**area, "source": "curated"} for area in catalog.get_areas()[:limit]]
+
+
+def local_locations(text: str, limit: int) -> list[dict]:
+    """Search the curated area list. Never makes an outbound request."""
+    needle = (text or "").casefold()
+    areas = catalog.get_areas()
+    matches = [a for a in areas if needle in a["name"].casefold()] if needle else areas
+    return [{**area, "source": "curated"} for area in matches[:limit]]
+
+
+def search_locations(*, text: str, limit: int = 8) -> dict:
+    """Resolve a typed area name. Never raises for provider problems.
+
+    Falls back to the curated Bengaluru list when no key is configured or the
+    provider fails, so the picker always has something to offer.
+    """
+    if not provider_configured():
+        return {"source": SOURCE_LOCAL, "reason": "not_configured", "results": local_locations(text, limit)}
+
+    try:
+        results = geoapify_places.search_locations(text=text, limit=limit)
+    except geoapify_places.ProviderError as exc:
+        logger.warning("location search fell back to curated areas: %s", exc.code)
+        return {"source": SOURCE_LOCAL, "reason": exc.code, "results": local_locations(text, limit)}
+
+    if not results:
+        return {"source": SOURCE_LOCAL, "reason": "empty_upstream", "results": local_locations(text, limit)}
+
+    return {"source": SOURCE_PROVIDER, "reason": None, "results": results}
+
+
 def _matches(record: dict, needle: str) -> bool:
     if not needle:
         return True

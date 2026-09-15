@@ -4,90 +4,79 @@ import { PhoneShell } from '../../components/layout/PhoneShell';
 import { ScreenHeader } from '../../components/layout/ScreenHeader';
 import { Button } from '../../components/primitives/Button';
 import { SectionLabel } from '../../components/primitives/SectionLabel';
-import { MemberRow } from '../../components/cards/MemberRow';
-import { useSession } from '../../store/SessionContext';
-import { useMatch, MEMBER } from '../../store/MatchContext';
-import { useSimulatedFriends } from '../../hooks/useSimulatedFriends';
+import { useGroup, MEMBER_STATE } from '../../store/GroupContext';
 import s from './Invite.module.css';
 
+const STATE_COPY = {
+  [MEMBER_STATE.JOINED]: 'Joined',
+  [MEMBER_STATE.SWIPING]: 'Swiping',
+  [MEMBER_STATE.FINISHED]: 'Finished'
+};
+
 export default function Invite() {
-  const { groupId } = useParams();
+  const { code: routeCode } = useParams();
   const navigate = useNavigate();
-  const { friends, getPerson } = useSession();
-  const { group, members, invite, memberJoined, enterLobby, statusOf } = useMatch();
+  const { group, code, participants, isHost, startGroup, busy, error } = useGroup();
 
   const [copied, setCopied] = useState(false);
   const [shareNote, setShareNote] = useState('');
-  const copyTimer = useRef(null);
+  const timer = useRef(null);
 
-  // Invited friends drift into "Joined" on their own — stands in for the
-  // websocket that milestone 6 will bring.
-  useSimulatedFriends({
-    members,
-    from: MEMBER.INVITED,
-    advance: memberJoined,
-    baseDelay: 2200,
-    stagger: 1600
-  });
+  useEffect(() => () => clearTimeout(timer.current), []);
 
-  useEffect(() => () => clearTimeout(copyTimer.current), []);
+  if (!code) return <Navigate to="/create" replace />;
+  if (routeCode !== code) return <Navigate to={'/invite/' + code} replace />;
 
-  // Refreshing on a stale URL should not strand the user on an empty screen.
-  if (!group) return <Navigate to="/create" replace />;
-  if (group.groupId !== groupId) return <Navigate to={'/invite/' + group.groupId} replace />;
+  const joinUrl = `${window.location.origin}/join/${code}`;
 
-  const invitedIds = members.filter((m) => m.status !== MEMBER.HOST).map((m) => m.id);
-  const joinedCount = members.filter((m) => m.status === MEMBER.JOINED || m.status === MEMBER.READY).length;
-
-  function toggleFriend(id) {
-    const next = invitedIds.includes(id) ? invitedIds.filter((x) => x !== id) : [...invitedIds, id];
-    invite(next);
-  }
-
-  function flash(setter, message) {
-    setter(message);
-    clearTimeout(copyTimer.current);
-    copyTimer.current = setTimeout(() => setter(''), 1800);
+  function flash(setter, value, reset) {
+    setter(value);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setter(reset), 1800);
   }
 
   async function copyCode() {
     try {
-      await navigator.clipboard.writeText(group.code);
+      await navigator.clipboard.writeText(code);
     } catch {
       const el = document.createElement('textarea');
-      el.value = group.code;
+      el.value = code;
       document.body.appendChild(el);
       el.select();
       document.execCommand('copy');
       el.remove();
     }
-    setCopied(true);
-    clearTimeout(copyTimer.current);
-    copyTimer.current = setTimeout(() => setCopied(false), 1800);
+    flash(setCopied, true, false);
   }
 
   async function share() {
-    const text = `Join my FoodMatch "${group.groupName}" — code ${group.code}`;
+    const text = `Join my FoodMatch "${group?.name || ''}" \u2014 code ${code}\n${joinUrl}`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'FoodMatch', text });
+        await navigator.share({ title: 'FoodMatch', text, url: joinUrl });
         return;
       } catch {
-        /* user dismissed the sheet */
+        /* the person dismissed the share sheet */
       }
     }
     try {
       await navigator.clipboard.writeText(text);
-      flash(setShareNote, 'Invite copied — paste it in WhatsApp');
+      flash(setShareNote, 'Invite copied \u2014 paste it in WhatsApp', '');
     } catch {
-      flash(setShareNote, 'Read out the code: ' + group.code);
+      flash(setShareNote, 'Read out the code: ' + code, '');
     }
   }
 
-  function startMatch() {
-    enterLobby();
-    navigate('/lobby/' + group.groupId);
+  async function start() {
+    try {
+      await startGroup();
+      navigate('/lobby/' + code);
+    } catch {
+      /* surfaced by `error` below */
+    }
   }
+
+  const enoughPeople = participants.length >= 2;
 
   return (
     <PhoneShell
@@ -95,9 +84,18 @@ export default function Invite() {
       footer={
         <div className={s.footer}>
           {shareNote && <p className={s.footerNote}>{shareNote}</p>}
-          <Button onClick={startMatch} disabled={members.length < 2}>
-            {members.length < 2 ? 'Pick someone to eat with' : 'Start match'}
-          </Button>
+          {error && (
+            <p className={s.footerNote} role="alert">
+              {error}
+            </p>
+          )}
+          {isHost ? (
+            <Button onClick={start} disabled={!enoughPeople || busy}>
+              {busy ? 'Starting\u2026' : enoughPeople ? 'Start match' : 'Waiting for someone to join'}
+            </Button>
+          ) : (
+            <Button onClick={() => navigate('/lobby/' + code)}>Go to the lobby</Button>
+          )}
         </div>
       }
     >
@@ -105,11 +103,11 @@ export default function Invite() {
         <div className={s.card}>
           <div className={s.cardTop}>
             <SectionLabel tone="onInk">Invite code</SectionLabel>
-            <span className={s.matchName}>{group.groupName}</span>
+            <span className={s.matchName}>{group?.name}</span>
           </div>
 
-          <button type="button" className={s.code} onClick={copyCode} aria-label={'Copy invite code ' + group.code}>
-            <span className={s.codeText}>{group.code}</span>
+          <button type="button" className={s.code} onClick={copyCode} aria-label={'Copy invite code ' + code}>
+            <span className={s.codeText}>{code}</span>
             <span className={s.copy}>{copied ? 'Copied' : 'Copy'}</span>
           </button>
 
@@ -119,32 +117,28 @@ export default function Invite() {
         </div>
 
         <div className={s.listHead}>
-          <h2 className={s.listTitle}>Your people</h2>
-          <SectionLabel>
-            {joinedCount} of {members.length - 1 || 0} joined
-          </SectionLabel>
+          <h2 className={s.listTitle}>In this FoodMatch</h2>
+          {/* Real people, refreshed by polling. Nothing here is simulated. */}
+          <SectionLabel>{participants.length} joined</SectionLabel>
         </div>
 
         <ul className={s.list}>
-          {friends.map((f) => {
-            const status = statusOf(f.id);
-            return (
-              <li key={f.id}>
-                <MemberRow
-                  person={f}
-                  status={status}
-                  selected={Boolean(status)}
-                  onClick={() => toggleFriend(f.id)}
-                  hint={status === MEMBER.JOINED ? 'In the group' : f.area}
-                  trailing={status ? undefined : <span className={s.add}>Invite</span>}
-                />
-              </li>
-            );
-          })}
+          {participants.map((person) => (
+            <li key={person.id} className={s.person}>
+              <span className={s.avatar} aria-hidden="true">
+                {person.initials}
+              </span>
+              <span className={s.personText}>
+                <span className={s.personName}>{person.displayName}</span>
+                <span className={s.personMeta}>{person.isHost ? 'Host' : 'Guest'}</span>
+              </span>
+              <span className={s.statePill}>{STATE_COPY[person.state] || person.state}</span>
+            </li>
+          ))}
         </ul>
 
         <p className={s.hint}>
-          Tap a friend to invite or remove them. {getPerson(group.creator)?.name || 'You'} is the host.
+          Friends open FoodMatch, tap <strong>Join a FoodMatch</strong> and enter this code. No account needed.
         </p>
       </div>
     </PhoneShell>

@@ -1,0 +1,14 @@
+[
+  { "id": "area_hsr", "name": "HSR Layout", "context": "Bengaluru, Karnataka", "latitude": 12.9121, "longitude": 77.6446 },
+  { "id": "area_koramangala", "name": "Koramangala", "context": "Bengaluru, Karnataka", "latitude": 12.9352, "longitude": 77.6245 },
+  { "id": "area_indiranagar", "name": "Indiranagar", "context": "Bengaluru, Karnataka", "latitude": 12.9719, "longitude": 77.6412 },
+  { "id": "area_btm", "name": "BTM Layout", "context": "Bengaluru, Karnataka", "latitude": 12.9166, "longitude": 77.6101 },
+  { "id": "area_jp_nagar", "name": "JP Nagar", "context": "Bengaluru, Karnataka", "latitude": 12.9063, "longitude": 77.5857 },
+  { "id": "area_jayanagar", "name": "Jayanagar", "context": "Bengaluru, Karnataka", "latitude": 12.9299, "longitude": 77.5826 },
+  { "id": "area_whitefield", "name": "Whitefield", "context": "Bengaluru, Karnataka", "latitude": 12.9698, "longitude": 77.7500 },
+  { "id": "area_mg_road", "name": "MG Road", "context": "Bengaluru, Karnataka", "latitude": 12.9757, "longitude": 77.6069 },
+  { "id": "area_malleshwaram", "name": "Malleshwaram", "context": "Bengaluru, Karnataka", "latitude": 13.0035, "longitude": 77.5709 },
+  { "id": "area_marathahalli", "name": "Marathahalli", "context": "Bengaluru, Karnataka", "latitude": 12.9591, "longitude": 77.6974 },
+  { "id": "area_electronic_city", "name": "Electronic City", "context": "Bengaluru, Karnataka", "latitude": 12.8452, "longitude": 77.6602 },
+  { "id": "area_basavanagudi", "name": "Basavanagudi", "context": "Bengaluru, Karnataka", "latitude": 12.9422, "longitude": 77.5738 }
+]

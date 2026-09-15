@@ -44,30 +44,9 @@ const googleCalls = () =>
   );
 const fontCalls = () => requests.filter((u) => /fonts\.(googleapis|gstatic)\.com/.test(u));
 
-const seed = {
-  groupId: 'g_net',
-  groupName: 'Friday Dinner',
-  code: 'FM-NET',
-  creator: 'u_abilash',
-  members: [
-    { id: 'u_abilash', status: 'host' },
-    { id: 'u_rahul', status: 'ready' },
-    { id: 'u_ananya', status: 'ready' },
-    { id: 'u_rohan', status: 'ready' }
-  ],
-  preferences: ['p_biryani'],
-  budget: 500,
-  distance: 5,
-  area: 'HSR Layout',
-  phase: 'swiping',
-  votes: {},
-  finished: [],
-  result: null,
-  createdAt: Date.now()
-};
 
 await page.goto(BASE + '/', { waitUntil: 'networkidle0' });
-await page.evaluate((s) => localStorage.setItem('foodmatch.match.v1', JSON.stringify(s)), seed);
+await page.evaluate(() => localStorage.clear());
 
 // ---- boot ----
 requests.length = 0;
@@ -83,7 +62,7 @@ await new Promise((r) => setTimeout(r, 6000));
 check('Sitting on Discover for 6s makes zero requests', apiCalls().length === 0, apiCalls().join(' '));
 
 // ---- swiping: the critical one ----
-await page.goto(BASE + '/swipe/g_net', { waitUntil: 'networkidle0' });
+await page.goto(BASE + '/browse', { waitUntil: 'networkidle0' });
 await new Promise((r) => setTimeout(r, 1000));
 requests.length = 0;
 for (let i = 0; i < 12; i += 1) {
@@ -100,28 +79,22 @@ await new Promise((r) => setTimeout(r, 6000));
 check('Waiting on the completion screen makes zero API calls', apiCalls().length === 0, apiCalls().join(' '));
 
 // ---- navigation between already-loaded screens ----
-for (let i = 0; i < 60; i += 1) {
-  const g = await page.evaluate(() => JSON.parse(localStorage.getItem('foodmatch.match.v1')));
-  if (g.result) break;
-  await new Promise((r) => setTimeout(r, 400));
-}
-const winner = await page.evaluate(() => JSON.parse(localStorage.getItem('foodmatch.match.v1')).result.winner.cardId);
-
 requests.length = 0;
-for (const route of ['/match/g_net', '/profile', '/matches', '/groups', '/']) {
-  await page.evaluate((r) => window.history.pushState({}, '', r), route);
-  await page.evaluate(() => window.dispatchEvent(new PopStateEvent('popstate')));
+for (const route of ['/profile', '/matches', '/groups', '/browse', '/']) {
+  await page.evaluate((r) => {
+    window.history.pushState({}, '', r);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }, route);
   await new Promise((r) => setTimeout(r, 700));
 }
 check('Navigating between loaded screens makes zero API calls', apiCalls().length === 0, apiCalls().join(' '));
 
 // ---- opening a restaurant detail ----
-// In-app navigation, the way a user actually opens a card.
 requests.length = 0;
-await page.evaluate((id) => {
-  window.history.pushState({}, '', '/restaurant/' + id);
+await page.evaluate(() => {
+  window.history.pushState({}, '', '/restaurant/r_ramen_house');
   window.dispatchEvent(new PopStateEvent('popstate'));
-}, winner);
+});
 await new Promise((r) => setTimeout(r, 1200));
 const detailApi = apiCalls();
 check('Opening a detail screen makes zero extra calls (served from memory)', detailApi.length === 0, `${detailApi.length}: ${detailApi.join(' ')}`);
@@ -137,6 +110,12 @@ check('History rows do not each trigger a request', apiCalls().length === histCa
 
 // ---- Google: must be zero, always ----
 check('Zero Google Maps/Places requests were made', googleCalls().length === 0, googleCalls().join(' '));
+const geoapifyCalls = () => requests.filter((u) => /geoapify\.com/i.test(u));
+check(
+  'Browser never calls Geoapify directly',
+  geoapifyCalls().length === 0,
+  geoapifyCalls().join(' ')
+);
 check(
   'Only Google Fonts contacts a Google domain (no API, no key)',
   fontCalls().every((u) => /fonts\.(googleapis|gstatic)\.com/.test(u)),
@@ -148,7 +127,7 @@ const exposed = await page.evaluate(() => {
   const blob = JSON.stringify({ ls: { ...localStorage }, ss: { ...sessionStorage } });
   return { hasGoogleKey: /AIza|GOOGLE_PLACES_API_KEY|VITE_GOOGLE/i.test(blob) };
 });
-check('No Google key in browser storage', exposed.hasGoogleKey === false);
+check('No provider key in browser storage', exposed.hasGoogleKey === false);
 
 check('No console errors', errors.length === 0, errors.slice(0, 3).join(' | '));
 

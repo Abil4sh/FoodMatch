@@ -159,14 +159,21 @@ check('Ids are URL-encoded', urlFor('/api/restaurants/' + encodeURIComponent('a 
   check('Null record is dropped', normalizeRestaurant(null) === null);
   const sparse = normalizeRestaurant({ id: 'r_x' });
   check('Missing name gets a safe default', typeof sparse.name === 'string' && sparse.name.length > 0, sparse.name);
-  check('Missing rating becomes 0, not NaN', sparse.rating === 0, String(sparse.rating));
-  check('Missing distance becomes 0, not NaN', sparse.distanceKm === 0, String(sparse.distanceKm));
+  // A live provider (Geoapify) supplies no rating or price. These must stay
+  // null so the UI omits them; 0 would render as a real zero-star rating.
+  check('Missing rating stays null, never 0', sparse.rating === null, String(sparse.rating));
+  check('Missing distance stays null, never 0', sparse.distanceKm === null, String(sparse.distanceKm));
+  check('Missing price stays null, never 0', sparse.priceForTwo === null, String(sparse.priceForTwo));
+  check('Missing rating is never NaN', !Number.isNaN(sparse.rating));
+  const full = normalizeRestaurant({ id: 'r_z', rating: 4.5, distanceKm: 1.2, priceForTwo: 700 });
+  check('Real values still pass through', full.rating === 4.5 && full.distanceKm === 1.2 && full.priceForTwo === 700);
+  check('Zero is preserved as zero, not nulled', normalizeRestaurant({ id: 'r_0', rating: 0 }).rating === 0);
   check('Missing cuisines becomes an array', Array.isArray(sparse.cuisines), JSON.stringify(sparse.cuisines));
   check('type is always set for restaurants', sparse.type === 'restaurant');
 
   const dish = normalizeDish({ id: 'd_x', price: '250', rating: 'not a number' });
   check('Numeric strings are coerced', dish.price === 250, String(dish.price));
-  check('Unparseable numbers fall back to 0', dish.rating === 0, String(dish.rating));
+  check('Unparseable numbers fall back to 0 for dishes', dish.rating === 0, String(dish.rating));
   check('veg defaults to false, never undefined', dish.veg === false);
   check('type is always set for dishes', dish.type === 'dish');
 

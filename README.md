@@ -33,7 +33,11 @@ Discover → Create FoodMatch → Invite Friends → Lobby → Swipe
 
 ## Features
 
-- **Group food matching** — create a match, set cuisines, budget and distance, invite friends
+- **Real group sessions** — create a FoodMatch, share a six-character code, friends
+  join anonymously with no account, everyone swipes independently and the server
+  computes the overlap
+- **Solo browsing** — no group required: pick an area and swipe through
+  restaurants or dishes on your own
 - **Restaurant and dish swiping** — draggable card deck with like/pass, separate decks for restaurants and dishes
 - **Group consensus scoring** — a transparent, explainable percentage per option
 - **Match reveal** — the winning place with who liked it, plus runners-up
@@ -66,11 +70,23 @@ stylesheet, which carries no key and no billing.
 
 ## Architecture
 
-**State.** One `MatchContext` built on `useReducer` holds the active group:
-members, their statuses, preferences, votes, completion and the computed
-result. Actions are explicit (`CREATE_GROUP`, `INVITE`, `MEMBER_READY`, `VOTE`,
-`MEMBER_FINISHED`, `COMPUTE_RESULT`, `START`, `RESET`). A separate
-`SessionContext` supplies the mock user and friends.
+**State.** `GroupContext` holds the live session: it stores the participant
+token, mirrors what the server reports, and sends intent. It never computes a
+result. `SessionContext` owns the catalog and the selected area.
+
+**The backend is authoritative.** Group membership, the deck, every vote and the
+final ranking live in the database. The client cannot assert who is in a group
+or what won.
+
+```
+React (Vercel)
+   │  HTTPS, participant token in X-FoodMatch-Participant
+   ▼
+Django REST API  ──▶  PostgreSQL   (groups, participants, deck, votes)
+   │
+   └─▶ Geoapify   (restaurant discovery, location search; key server-side)
+           ↘ local JSON catalog fallback
+```
 
 **Swipe deck.** `useSwipeDeck` owns deck state and nothing else — no DOM, no
 motion values. The current index is *derived* from the votes already in
@@ -80,10 +96,10 @@ position lives inside `SwipeCard` as a Framer motion value so dragging never
 re-renders the deck. Gestures and the on-screen buttons commit through the
 same `swipe(dir)` function.
 
-**Matching engine.** `services/matchEngine.js` is a pure function of
-`(cards, members, votes)`. No React, no clock, no randomness — the same input
-always produces the same output, which is what makes it testable now and
-replaceable with a server implementation later.
+**Matching engine.** `backend/api/services/group_matching.py` is a pure function
+of `(cards, votes, participants)`. No ORM objects, no clock, no randomness, so
+the same input always produces the same ranking — and a result can be explained
+and reproduced.
 
 **Services.** Data access is kept out of the UI. `catalog.js` resolves card
 ids, `deck.js` builds and orders a deck, `profile.js` derives Food DNA and
@@ -105,20 +121,27 @@ memory by `services/catalogStore.js`, so rendering cards, swiping, opening a
 detail screen and navigating between loaded screens all make **zero** further
 requests. This is enforced by a test, not just by convention.
 
-**Persistence.** `localStorage` under two keys: `foodmatch.match.v1` for the
-active group and `foodmatch.history.v1` for past matches. State rehydrates
-synchronously on load, so a refresh mid-flow does not flash an empty screen.
+**Persistence.** Group state is in the database. The browser keeps only small
+personal items in `localStorage`: `foodmatch.session.v1` (which group this
+browser belongs to, and its participant token), `foodmatch.location.v1` (the
+selected area), `foodmatch.likes.v1` (the Food DNA trail) and
+`foodmatch.history.v1` (past results).
+
+**Polling, not WebSockets.** The lobby refreshes every 3s and the swipe screen
+every 5s. Polling stops when the group completes and pauses when the tab is
+hidden. A socket layer would add deployment complexity for very little here.
 
 ## Matching algorithm
 
 ```
-Group Match % = (members who liked it / total members in the group) × 100
+Group Match % = (participants who liked it / participants who voted on it) × 100
 ```
 
-The denominator is the size of the whole group, never the number of members
-who happen to have voted. A card that two people never reached has not earned
-their agreement, so a group that has not finished cannot produce a misleading
-100%.
+The denominator is the people who actually voted on *that card*. A card the
+last two people never reached is not punished for their absence; what matters
+is agreement among those who expressed an opinion. Every result also carries
+`votedBy` and `totalParticipants`, so the UI can be honest about sample size —
+"3 of 4 people matched" is shown alongside the percentage.
 
 Worked example, four members:
 
@@ -134,17 +157,19 @@ Worked example, four members:
 Ties break in this order:
 
 1. **Group score** — the consensus percentage
-2. **Number of likes** — raw agreement, which separates equal scores in unequal groups
-3. **Rating** — the better-reviewed option
-4. **Distance** — the nearer option
+2. **Number of likes** — a 3/3 beats a 1/1
+3. **How many voted** — a wider sample is a stronger signal
+4. **Rating** — the better-reviewed option
+5. **Distance** — the nearer option
 
-Original deck order is the final fallback, so the sort is fully deterministic.
+Original deck order is the final fallback, so the sort is total and deterministic.
 
 This is deliberately arithmetic, not machine learning. Anyone should be able to
 read the number off the page and check it by hand.
 
-**Honest caveat:** restaurants, dishes, friends and every vote except your own
-are mock data held in local JSON. The engine is real; the inputs are not.
+**Every vote is real.** There is no simulated friend voting anywhere in the
+group flow. Restaurants come from Geoapify (or the bundled catalog when no key
+is set); dishes and prices are curated and labelled approximate.
 
 ## Project structure
 
@@ -174,11 +199,16 @@ backend/
   config/          settings, urls, wsgi
   api/
     urls.py        fixed routes; no URL or service name is ever a parameter
-    views.py       read-only endpoints, throttled, safe error handler
+    models.py      FoodMatchGroup, Participant, DeckCard, Vote
+    views.py       catalog + location endpoints, throttled, safe error handler
+    group_views.py group sessions: create, join, start, deck, vote, finish, results
     serializers.py explicit field allowlists
     validation.py  id format and result-count limits
     services/
-      catalog.py   the single data-access seam
+      catalog.py         the single local data-access seam
+      geoapify_places.py the only module that talks to Geoapify
+      restaurant_provider.py  provider-neutral boundary + local fallback
+      group_matching.py  pure, deterministic ranking
     data/          restaurants, dishes, friends, user, cravings
     tests.py
 ```
@@ -197,8 +227,12 @@ pip install -r requirements.txt
 python manage.py runserver
 ```
 
-Leave it running. It serves http://localhost:8000. No migrations are needed —
-there is no database.
+```bash
+python manage.py migrate      # creates db.sqlite3 locally
+python manage.py runserver
+```
+
+Leave it running; it serves http://127.0.0.1:8000. SQLite needs no setup.
 
 **2. Frontend** (second terminal), from the project root:
 
@@ -271,22 +305,80 @@ and no Google Maps/Places request is made at all.
 Pass `VW=1366 VH=640` to any of them to run at a laptop viewport. See
 `tests/README.md` for details.
 
+## Deployment
+
+**Frontend (Vercel).** Import the repo, framework preset Vite, build `npm run build`,
+output `dist`. Set `VITE_API_BASE_URL` to the deployed Django origin. `vercel.json`
+rewrites all paths to `index.html` so React Router deep links work.
+
+**Backend (any Python host).** `backend/Procfile` declares the release and web
+commands:
+
+```
+release: python manage.py migrate --noinput
+web: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3
+```
+
+Required environment variables:
+
+| Variable | Purpose |
+| --- | --- |
+| `DJANGO_SECRET_KEY` | Required. Startup is refused with `DEBUG=false` and the dev key. |
+| `DJANGO_DEBUG` | `false` in production. |
+| `DJANGO_ALLOWED_HOSTS` | Comma-separated hostnames. |
+| `DJANGO_CORS_ALLOWED_ORIGINS` | Your Vercel origin. Never `*`. |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | Same. |
+| `DATABASE_URL` | `postgres://…` in production; empty for local SQLite. |
+| `GEOAPIFY_API_KEY` | Server-side only. Empty = bundled catalog, zero outbound calls. |
+
+Never set a Geoapify key in a `VITE_*` variable — Vite publishes those to the browser.
+
+## API
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/api/health/` | Liveness; reports whether a provider key is present |
+| GET | `/api/feed/?lat&lng` | Boot catalog for the selected area |
+| GET | `/api/restaurants/`, `/api/restaurants/<id>/`, `/api/dishes/`, `/api/dishes/<id>/` | Catalog |
+| GET | `/api/restaurants/search/` | Restaurant search |
+| GET | `/api/locations/search/`, `/api/locations/popular/` | Area lookup |
+| POST | `/api/groups/` | Create a FoodMatch; returns code + participant token |
+| POST | `/api/groups/<code>/join/` | Join anonymously |
+| GET | `/api/groups/<code>/` | Group status and participants (polled) |
+| POST | `/api/groups/<code>/start/` | Host starts; freezes the shared deck |
+| GET | `/api/groups/<code>/deck/` | The frozen deck, identical for everyone |
+| POST | `/api/groups/<code>/votes/` | One like or pass; duplicates refused |
+| POST | `/api/groups/<code>/finish/` | Mark this participant done |
+| GET | `/api/groups/<code>/results/` | Server-computed ranking |
+
+## Security notes
+
+Secrets are server-side only and read from the environment at call time, never
+copied into Django settings. Group codes use a 32-character ambiguity-free
+alphabet (≈1.07 billion combinations) and are validated against an anchored
+pattern. The participant token is an opaque bearer credential returned once and
+never included in any group payload, so knowing a code does not let you act as
+someone else. Duplicate votes are refused by a database constraint, not by
+client discipline. All group endpoints are throttled. CORS lists explicit
+origins. No endpoint accepts a URL or an upstream service name, so the API
+cannot be used as a proxy. This is a portfolio project, not an audited system.
+
 ## Current limitations
 
 - **Mock restaurant data.** Twelve restaurants and twelve dishes in local JSON.
   Real names, invented ratings and prices.
 - **No database and no authentication.** The Django API is read-only and
   unauthenticated; the catalog is JSON on disk.
-- **No Google integration.** Real restaurant data is not connected. That work
-  is gated behind a separate security and billing review.
-- **Simulated friend votes.** Other members' votes are generated from a seeded
-  hash of group, member and card. They are deterministic — the same group
-  always produces the same result, so a refresh never reshuffles a winner you
-  have already seen — but they are not real people.
-- **No real-time multiplayer.** Friends joining, becoming ready and swiping are
-  local timers, not network events.
-- **Local persistence only.** State lives in `localStorage`, so it does not
-  follow you between browsers or devices.
+- **Restaurant data comes from Geoapify** when a server-side key is present,
+  and from the bundled catalog otherwise. Geoapify is OpenStreetMap-derived: it
+  has no ratings, review counts or prices, so those are omitted rather than
+  invented. Dishes stay curated local data, since no places API supplies menus.
+- **Polling, not push.** Lobby and swipe updates arrive every few seconds
+  rather than instantly.
+- **Sessions expire after 12 hours** and there is no way to rejoin a completed
+  group or remove a participant.
+- **Anonymous identity is per-browser.** Clearing site data loses your place in
+  a group; there are no accounts by design.
 - **Placeholder food imagery.** No photography is bundled. `FoodPhoto` draws an
   illustrated motif chosen from each card's cuisine, with a per-item backdrop
   so cards do not repeat. It is a single swap point for real images later.
@@ -301,8 +393,8 @@ None of the following is implemented — this is the roadmap, not the changelog.
 
 - PostgreSQL for groups, votes and match history
 - Authentication and real user accounts
-- Real restaurant data from Google Places, behind the existing backend service
-  seam, with server-side credentials, strict quotas and rate limiting
+- Richer restaurant metadata: Geoapify (OpenStreetMap) supplies names,
+  addresses and categories but no ratings, review counts or prices
 - Real-time group sessions over WebSockets, replacing the simulated timers
 - Real food photography behind the existing `FoodPhoto` component
 - Smarter ranking — dietary constraints, budget fit and past behaviour as

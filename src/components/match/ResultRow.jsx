@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { FoodPhoto } from '../swipe/FoodPhoto';
 import { MatchMeter } from '../primitives/MatchMeter';
+import { factList } from '../../services/fields';
 import s from './ResultRow.module.css';
 
 export function ResultRow({ result, delay = 0, onOpen }) {
@@ -24,7 +25,7 @@ export function ResultRow({ result, delay = 0, onOpen }) {
       <div className={s.text}>
         <span className={s.name}>{card.name}</span>
         <span className={s.sub}>
-          {isDish ? card.restaurantName : card.cuisines?.[0]} &middot; {card.distanceKm} km
+          {factList(isDish ? card.restaurantName : card.cuisines?.[0], card.distanceKm && card.distanceKm + ' km').join(' \u00B7 ')}
         </span>
         <MatchMeter value={result.percent} label={card.name + ' group match'} />
       </div>

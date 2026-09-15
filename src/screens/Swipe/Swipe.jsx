@@ -1,96 +1,134 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { PhoneShell } from '../../components/layout/PhoneShell';
-import { Segmented } from '../../components/primitives/Segmented';
-import { Avatar } from '../../components/primitives/Avatar';
 import { MatchMeter } from '../../components/primitives/MatchMeter';
 import { SwipeCard } from '../../components/swipe/SwipeCard';
-import { useSession } from '../../store/SessionContext';
-import { useMatch } from '../../store/MatchContext';
 import { useSwipeDeck, LIKE } from '../../hooks/useSwipeDeck';
-import { useSimulatedProgress } from '../../hooks/useSimulatedProgress';
-import { useMatchResult } from '../../hooks/useMatchResult';
-import { buildDeck, DECK_MODES } from '../../services/deck';
+import { useGroup, GROUP_STATUS, MEMBER_STATE } from '../../store/GroupContext';
+import { recordLike } from '../../services/likes';
 import { DeckComplete } from './DeckComplete';
 import s from './Swipe.module.css';
 
+/*
+ * Swiping against a real group session.
+ *
+ * The deck comes from the server and is identical for everyone in the group.
+ * Each swipe is posted as a vote and the server is the record of truth; local
+ * state only drives the animation. There is no friend simulation here.
+ */
 export default function Swipe() {
-  const { groupId } = useParams();
+  const { code: routeCode } = useParams();
   const navigate = useNavigate();
-  const { user, getPerson } = useSession();
-  const { group, members, votesOf, vote, memberFinished, result } = useMatch();
-  const [mode, setMode] = useState('restaurants');
+  const { group, code, status, participants, you, vote, loadDeck, finishSwiping, error } = useGroup();
 
-  const cards = useMemo(() => buildDeck(mode, group), [mode, group]);
-  const myVotes = votesOf(user?.id);
+  const [cards, setCards] = useState([]);
+  const [serverVotes, setServerVotes] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [deckError, setDeckError] = useState(null);
+  const finishedRef = useRef(false);
+
+  // One fetch when the round starts. Nothing re-fetches on render or on swipe.
+  useEffect(() => {
+    if (!code || status === GROUP_STATUS.LOBBY) return;
+    let alive = true;
+    setLoading(true);
+    loadDeck()
+      .then((body) => {
+        if (!alive || !body) return;
+        setCards(body.cards || []);
+        setServerVotes(body.yourVotes || {});
+        setDeckError(null);
+      })
+      .catch((err) => alive && setDeckError(err?.message || 'Could not load the deck.'))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [code, status, loadDeck]);
+
+  // Votes already recorded server-side seed the deck position, so a refresh
+  // resumes exactly where this participant left off.
+  const [localVotes, setLocalVotes] = useState({});
+  const votes = useMemo(() => ({ ...serverVotes, ...localVotes }), [serverVotes, localVotes]);
+
+  const onVote = useCallback(
+    (card, direction) => {
+      setLocalVotes((prev) => ({ ...prev, [card.id]: direction }));
+      // Personal trail for Food DNA; the authoritative vote is the server's.
+      if (direction === LIKE) recordLike(card.id);
+      // Fire and forget: the optimistic update keeps the gesture smooth, and a
+      // failed vote is recoverable because the server rejects duplicates.
+      vote(card.id, direction).catch(() => {});
+    },
+    [vote]
+  );
 
   const { visibleCards, index, total, exhausted, lastDirection, swipe, swipeLeft, swipeRight } = useSwipeDeck({
     cards,
-    votes: myVotes,
-    onVote: (card, dir) => user && vote(user.id, card.id, dir)
+    votes,
+    onVote
   });
 
-  const friends = members.map((m) => getPerson(m.id)).filter((p) => p && p.id !== user?.id);
-  const { finalize } = useMatchResult({ cards, mode });
-  const finalizedFor = useRef(null);
-
-  const { progress, allFinished } = useSimulatedProgress({
-    memberIds: friends.map((f) => f.id),
-    total,
-    rush: exhausted
-  });
-
-  // Record that this user is done, then close the round out once the rest of
-  // the group has finished too.
+  // Tell the server once, when this participant runs out of cards.
   useEffect(() => {
-    if (exhausted && user) memberFinished(user.id);
-  }, [exhausted, user, memberFinished]);
+    if (!exhausted || finishedRef.current || !cards.length) return;
+    finishedRef.current = true;
+    finishSwiping().catch(() => {});
+  }, [exhausted, cards.length, finishSwiping]);
 
-  useEffect(() => {
-    if (!exhausted || !allFinished) return;
-    const key = (group?.groupId || '') + ':' + mode;
-    if (finalizedFor.current === key) return;
-    finalizedFor.current = key;
-    finalize();
-  }, [exhausted, allFinished, finalize, group, mode]);
+  if (!code) return <Navigate to="/create" replace />;
+  if (routeCode !== code) return <Navigate to={'/swipe/' + code} replace />;
+  if (status === GROUP_STATUS.LOBBY) return <Navigate to={'/lobby/' + code} replace />;
 
-  if (!group) return <Navigate to="/create" replace />;
-  if (group.groupId !== groupId) return <Navigate to={'/swipe/' + group.groupId} replace />;
+  const likes = cards.filter((c) => votes[c.id] === LIKE).length;
+  const others = participants.filter((p) => p.id !== you?.id);
+  const everyoneFinished = Boolean(group?.everyoneFinished);
 
-  const likes = cards.filter((c) => myVotes[c.id] === LIKE).length;
-  const otherMode = DECK_MODES.find((m) => m.value !== mode);
+  if (loading) {
+    return (
+      <PhoneShell tabs={false}>
+        <div className={s.screen}>
+          <p className={s.loading}>Loading the deck…</p>
+        </div>
+      </PhoneShell>
+    );
+  }
+
+  if (deckError || !cards.length) {
+    return (
+      <PhoneShell tabs={false}>
+        <div className={s.screen}>
+          <h1 className={s.loadingTitle}>No cards to swipe</h1>
+          <p className={s.loading}>{deckError || 'This FoodMatch has an empty deck.'}</p>
+        </div>
+      </PhoneShell>
+    );
+  }
 
   return (
     <PhoneShell tabs={false}>
       <div className={s.screen}>
-        <h1 className="srOnly">Swiping for {group.groupName}</h1>
+        <h1 className="srOnly">Swiping for {group?.name}</h1>
         <header className={s.head}>
-          <button type="button" className={s.back} onClick={() => navigate('/lobby/' + group.groupId)} aria-label="Back to lobby">
+          <button type="button" className={s.back} onClick={() => navigate('/lobby/' + code)} aria-label="Back to lobby">
             &lsaquo;
           </button>
-          <span className={s.groupName}>{group.groupName}</span>
+          <span className={s.groupName}>{group?.name}</span>
           <span className={s.count} aria-live="polite" aria-label={index + ' of ' + total + ' swiped'}>
             {index}
             <span className={s.countTotal}> / {total}</span>
           </span>
         </header>
 
-        <div className={s.toggle}>
-          <Segmented label="Swipe deck" options={DECK_MODES} value={mode} onChange={setMode} />
-        </div>
-
         {exhausted ? (
           <DeckComplete
-            group={group}
+            group={{ groupName: group?.name, groupId: code }}
             likes={likes}
             total={total}
-            friends={friends}
-            progress={progress}
-            allFinished={allFinished}
-            onSwitchDeck={() => setMode(otherMode.value)}
-            otherDeckLabel={otherMode.label}
-            result={result}
+            participants={others}
+            everyoneFinished={everyoneFinished}
+            onSeeMatch={() => navigate('/match/' + code)}
           />
         ) : (
           <>
@@ -123,10 +161,9 @@ export default function Swipe() {
             <div className={s.groupStrip}>
               <div className={s.stripHead}>
                 <span className={s.stripTitle}>Everyone is swiping</span>
-                <span className={s.stripNote}>Friends simulated</span>
+                {error && <span className={s.stripNote}>Offline</span>}
               </div>
               <div className={s.you}>
-                <Avatar person={user} size={26} />
                 <span className={s.youLabel}>You</span>
                 <div className={s.youBar}>
                   <MatchMeter value={total ? Math.round((index / total) * 100) : 0} label="Your progress" />
@@ -136,11 +173,13 @@ export default function Swipe() {
                 </span>
               </div>
               <div className={s.others}>
-                {friends.map((f) => (
-                  <span key={f.id} className={s.other}>
-                    <Avatar person={f} size={22} />
+                {others.map((p) => (
+                  <span key={p.id} className={s.other}>
+                    <span className={s.otherAvatar} aria-hidden="true">
+                      {p.initials}
+                    </span>
                     <span className={s.otherCount}>
-                      {progress[f.id] || 0}/{total}
+                      {p.state === MEMBER_STATE.FINISHED ? 'done' : `${p.voted}/${p.deckSize || total}`}
                     </span>
                   </span>
                 ))}

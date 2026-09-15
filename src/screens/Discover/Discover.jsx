@@ -8,25 +8,28 @@ import { FoodPhoto } from '../../components/swipe/FoodPhoto';
 import { LivePulse } from '../../components/primitives/LivePulse';
 import { SectionLabel, SectionHead } from '../../components/primitives/SectionLabel';
 import { RestaurantRow } from '../../components/cards/RestaurantRow';
+import { useState } from 'react';
 import { useSession } from '../../store/SessionContext';
-import { useMatch, PHASE } from '../../store/MatchContext';
+import { LocationSheet } from '../../components/location/LocationSheet';
+import { useGroup, GROUP_STATUS } from '../../store/GroupContext';
 import s from './Discover.module.css';
 
 export default function Discover() {
   const navigate = useNavigate();
-  const { loading, user, activeMatch, restaurants, cravings, getPerson, isLocalData } = useSession();
-  const { group, members: groupMembers, readyCount, readyPct } = useMatch();
+  const { loading, user, activeMatch, restaurants, cravings, getPerson, isLocalData, location, setLocation } = useSession();
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const { group: liveGroup, code: liveCode, participants, status } = useGroup();
 
-  // A group the user built in this session outranks the seeded demo match.
-  const groupPeople = groupMembers.map((m) => getPerson(m.id)).filter(Boolean);
+  // The live backend session, if this browser is in one.
+  const group = liveGroup;
+  const finishedCount = participants.filter((p) => p.state === 'finished').length;
+  const readyPct = participants.length ? Math.round((finishedCount / participants.length) * 100) : 0;
   const resume =
-    group?.phase === PHASE.MATCHED
-      ? { label: 'See your match', to: '/match/' + group.groupId }
-      : group?.phase === PHASE.SWIPING
-      ? { label: 'Continue swiping', to: '/swipe/' + group.groupId }
-      : group?.phase === PHASE.LOBBY
-        ? { label: 'Back to the lobby', to: '/lobby/' + group.groupId }
-        : { label: 'Invite friends', to: '/invite/' + (group?.groupId || '') };
+    status === GROUP_STATUS.COMPLETED
+      ? { label: 'See your match', to: '/match/' + liveCode }
+      : status === GROUP_STATUS.SWIPING
+        ? { label: 'Continue swiping', to: '/swipe/' + liveCode }
+        : { label: 'Invite friends', to: '/invite/' + liveCode };
 
   const members = (activeMatch?.memberIds || []).map(getPerson).filter(Boolean);
   const others = members.filter((m) => m.id !== user?.id);
@@ -43,10 +46,17 @@ export default function Discover() {
       )}
       <div className={s.wrap}>
         <div className={s.top}>
-          <div className={s.place}>
+          <button
+            type="button"
+            className={s.place}
+            onClick={() => setPickerOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={pickerOpen}
+            aria-label={'Change area. Currently ' + (location?.name || 'Bengaluru')}
+          >
             <span className={s.placeLabel}>Delivering to</span>
-            <span className={s.placeName}>{user?.area || 'Bengaluru'} &#9662;</span>
-          </div>
+            <span className={s.placeName}>{location?.name || 'Bengaluru'} &#9662;</span>
+          </button>
           <button type="button" onClick={() => navigate('/profile')} aria-label="Your profile">
             <Avatar person={user} size={42} />
           </button>
@@ -63,12 +73,12 @@ export default function Discover() {
                     <LivePulse />
                     <span className={s.liveTagText}>Your match</span>
                   </div>
-                  <div className={s.liveName}>{group.groupName}</div>
+                  <div className={s.liveName}>{group.name}</div>
                   <div className={s.liveSub}>
-                    {readyCount} of {groupMembers.length} ready &middot; code {group.code}
+                    {participants.length} {participants.length === 1 ? 'person' : 'people'} &middot; code {group.code}
                   </div>
                 </div>
-                <AvatarStack people={groupPeople} max={3} ring="ink" />
+
               </div>
               <MatchMeter value={readyPct} tone="ink" label="Group readiness" />
               <Button onClick={() => navigate(resume.to)}>{resume.label}</Button>
@@ -91,7 +101,7 @@ export default function Discover() {
                 <AvatarStack people={others} max={3} ring="ink" />
               </div>
               <MatchMeter value={progress} tone="ink" label="Group swipe progress" />
-              <Button onClick={() => navigate('/swipe/' + activeMatch.id)}>
+              <Button onClick={() => navigate('/browse')}>
                 Continue swiping &middot; {activeMatch.deckRemaining} left
               </Button>
             </div>
@@ -103,6 +113,18 @@ export default function Discover() {
               <p className={s.emptyTitle}>Start a FoodMatch</p>
               <Button onClick={() => navigate('/create')}>Create a FoodMatch</Button>
             </div>
+          )}
+
+          {/* Guests arrive with a code rather than creating anything. */}
+          {!loading && (
+            <Button variant="outline" onClick={() => navigate('/browse')}>
+              Browse on your own
+            </Button>
+          )}
+          {!loading && (
+            <Button variant="quiet" onClick={() => navigate('/join')}>
+              Join a FoodMatch
+            </Button>
           )}
 
           {!loading && (group || activeMatch) && (
@@ -140,6 +162,13 @@ export default function Discover() {
           </div>
         </div>
       </div>
+
+      <LocationSheet
+        open={pickerOpen}
+        current={location}
+        onSelect={setLocation}
+        onClose={() => setPickerOpen(false)}
+      />
     </PhoneShell>
   );
 }

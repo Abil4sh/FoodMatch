@@ -74,3 +74,38 @@
   padding: 2px 0 4px;
 }
 .skip:hover { color: var(--text-2); }
+
+/* real participant rows */
+.person {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: 11px 14px;
+  border-radius: var(--r-card);
+  background: var(--cream);
+  border: 1.5px solid var(--hairline);
+}
+.avatar {
+  width: 36px; height: 36px;
+  border-radius: var(--r-pill);
+  background: var(--grad-saffron);
+  color: var(--ink);
+  display: grid; place-items: center;
+  font-weight: 800; font-size: 14px; flex: none;
+}
+.personText { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.personName { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+.personMeta { font-size: 12px; color: var(--muted); }
+.statePill {
+  flex: none;
+  padding: 6px 11px;
+  border-radius: var(--r-pill);
+  background: var(--cream-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--amber-ink);
+}
+.where { font-size: 15px; color: var(--text-2); }
+.errorNote { font-size: 12px; color: var(--chilli); text-align: center; }

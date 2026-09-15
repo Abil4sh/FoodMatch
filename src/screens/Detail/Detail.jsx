@@ -6,9 +6,10 @@ import { SectionLabel } from '../../components/primitives/SectionLabel';
 import { EmptyState } from '../../components/primitives/EmptyState';
 import { MatchMeter } from '../../components/primitives/MatchMeter';
 import { FoodPhoto } from '../../components/swipe/FoodPhoto';
-import { useMatch } from '../../store/MatchContext';
+import { useEffect, useState } from 'react';
+import { useGroup } from '../../store/GroupContext';
 import { findCardById, dishesForRestaurant, venueFor, describe } from '../../services/catalog';
- const has = (value) => value !== null && value !== undefined && value !== '';
+import { has } from '../../services/fields';
 import { openDirections, directionsUrl } from '../../services/maps';
 import s from './Detail.module.css';
 
@@ -16,7 +17,21 @@ export default function Detail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { group, result } = useMatch();
+  const { group, loadResults } = useGroup();
+
+  // Only when the user came from a reveal: one call, on an explicit path.
+  const [result, setResult] = useState(null);
+  const cameFromMatch = params.get('from') === 'match';
+  useEffect(() => {
+    if (!cameFromMatch) return undefined;
+    let alive = true;
+    loadResults()
+      .then((body) => alive && setResult(body))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [cameFromMatch, loadResults]);
 
   const card = findCardById(id);
 
@@ -41,8 +56,7 @@ export default function Detail() {
   const menu = isDish ? dishesForRestaurant(card.restaurantId).filter((d) => d.id !== card.id) : dishesForRestaurant(card.id);
 
   // Only claim a group match when we arrived from one and it is for this card.
-  const fromMatch = params.get('from') === 'match';
-  const scored = fromMatch ? result?.results?.find((r) => r.cardId === card.id) : null;
+  const scored = cameFromMatch ? result?.results?.find((r) => r.cardId === card.id) : null;
 
   return (
     <PhoneShell tabs={false}>
@@ -61,11 +75,18 @@ export default function Detail() {
 
 {(() => {
           // Only render facts the record actually has.
+          // Typical spend per person is the more useful figure, so it replaces
+          // price-for-two rather than sitting beside it. Three facts, one row.
           const price = isDish ? card.price : card.priceForTwo;
+          const spend = has(venue?.typicalSpendMin)
+            ? { label: 'Typical spend', value: '\u20B9' + venue.typicalSpendMin + '\u2013\u20B9' + venue.typicalSpendMax }
+            : has(price)
+              ? { label: isDish ? 'Price' : 'For two', value: '\u20B9' + price }
+              : null;
           const facts = [
             has(card.rating) && { label: 'Rating', value: '\u2605 ' + card.rating },
             has(card.distanceKm) && { label: 'Distance', value: card.distanceKm + ' km' },
-            has(price) && { label: isDish ? 'Price' : 'For two', value: '\u20B9' + price }
+            spend
           ].filter(Boolean);
           if (facts.length === 0) return null;
           return (
@@ -85,7 +106,7 @@ export default function Detail() {
             </div>
             <MatchMeter value={scored.percent} label="Group match" />
             <p className={s.matchNote}>
-              {scored.likes} of {scored.totalMembers} in {group?.groupName || 'your group'} liked this.
+              {scored.likes} of {scored.votedBy} in {group?.name || 'your group'} liked this.
             </p>
           </section>
         )}
@@ -111,9 +132,19 @@ export default function Detail() {
           </section>
         )}
 
+        {menu.length === 0 && !isDish && (
+          <section className={s.block}>
+            <SectionLabel>Popular dishes</SectionLabel>
+            {/* No curated menu for this place. Nothing is invented to fill it. */}
+            <p className={s.unavailable}>
+              Menu information unavailable for {card.name} yet.
+            </p>
+          </section>
+        )}
+
         {menu.length > 0 && (
           <section className={s.block}>
-            <SectionLabel>{isDish ? 'Also from here' : 'What to order'}</SectionLabel>
+            <SectionLabel>{isDish ? 'Also from here' : 'Popular dishes'}</SectionLabel>
             <ul className={s.menu}>
               {menu.map((d) => (
                 <li key={d.id}>
@@ -131,6 +162,12 @@ export default function Detail() {
                 </li>
               ))}
             </ul>
+            {has(venue?.typicalSpendMin) && (
+              <p className={s.spendNote}>
+                Approx. &#8377;{venue.typicalSpendMin}&ndash;&#8377;{venue.typicalSpendMax} per person.
+                Prices are indicative and may have changed.
+              </p>
+            )}
           </section>
         )}
 

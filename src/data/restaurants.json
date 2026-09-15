@@ -21,7 +21,10 @@
       "Small plates"
     ],
     "hours": "12:00 PM – 11:30 PM",
-    "address": "1st Cross, 5th Block, Koramangala, Bengaluru 560095"
+    "address": "1st Cross, 5th Block, Koramangala, Bengaluru 560095",
+    "typicalSpendMin": 350,
+    "typicalSpendMax": 500,
+    "pricingIsApproximate": true
   },
   {
     "id": "r_biryani_adda",
@@ -45,7 +48,10 @@
       "Bestseller"
     ],
     "hours": "11:30 AM – 12:00 AM",
-    "address": "100 Feet Road, Indiranagar, Bengaluru 560038"
+    "address": "100 Feet Road, Indiranagar, Bengaluru 560038",
+    "typicalSpendMin": 250,
+    "typicalSpendMax": 400,
+    "pricingIsApproximate": true
   },
   {
     "id": "r_dosa_diaries",
@@ -69,7 +75,10 @@
       "Quick bite"
     ],
     "hours": "7:00 AM – 10:30 PM",
-    "address": "27th Main, Sector 2, HSR Layout, Bengaluru 560102"
+    "address": "27th Main, Sector 2, HSR Layout, Bengaluru 560102",
+    "typicalSpendMin": 120,
+    "typicalSpendMax": 200,
+    "pricingIsApproximate": true
   },
   {
     "id": "r_kebab_kothi",
@@ -93,7 +102,10 @@
       "Date night"
     ],
     "hours": "6:00 PM – 1:00 AM",
-    "address": "80 Feet Road, 8th Block, Koramangala, Bengaluru 560095"
+    "address": "80 Feet Road, 8th Block, Koramangala, Bengaluru 560095",
+    "typicalSpendMin": 400,
+    "typicalSpendMax": 600,
+    "pricingIsApproximate": true
   },
   {
     "id": "r_nomad_bakehouse",
@@ -117,7 +129,10 @@
       "Work friendly"
     ],
     "hours": "8:00 AM – 10:00 PM",
-    "address": "12th Main, Indiranagar, Bengaluru 560038"
+    "address": "12th Main, Indiranagar, Bengaluru 560038",
+    "typicalSpendMin": 300,
+    "typicalSpendMax": 450,
+    "pricingIsApproximate": true
   },
   {
     "id": "r_thali_theory",
@@ -141,7 +156,10 @@
       "Pure veg"
     ],
     "hours": "11:00 AM – 10:30 PM",
-    "address": "16th Main, BTM 2nd Stage, Bengaluru 560076"
+    "address": "16th Main, BTM 2nd Stage, Bengaluru 560076",
+    "typicalSpendMin": 250,
+    "typicalSpendMax": 350,
+    "pricingIsApproximate": true
   },
   {
     "id": "r_wok_lane",
@@ -165,7 +183,10 @@
       "Delivery star"
     ],
     "hours": "12:00 PM – 11:00 PM",
-    "address": "Kaikondrahalli, Sarjapur Road, Bengaluru 560035"
+    "address": "Kaikondrahalli, Sarjapur Road, Bengaluru 560035",
+    "typicalSpendMin": 300,
+    "typicalSpendMax": 450,
+    "pricingIsApproximate": true
   },
   {
     "id": "r_pizza_pilgrim",
@@ -189,7 +210,10 @@
       "Shareable"
     ],
     "hours": "12:00 PM – 11:00 PM",
-    "address": "Sector 6, HSR Layout, Bengaluru 560102"
+    "address": "Sector 6, HSR Layout, Bengaluru 560102",
+    "typicalSpendMin": 350,
+    "typicalSpendMax": 550,
+    "pricingIsApproximate": true
   },
   {
     "id": "r_meghana",
@@ -213,7 +237,10 @@
       "Spicy"
     ],
     "hours": "11:00 AM – 11:00 PM",
-    "address": "Residency Road, Shanthala Nagar, Bengaluru 560025"
+    "address": "Residency Road, Shanthala Nagar, Bengaluru 560025",
+    "typicalSpendMin": 350,
+    "typicalSpendMax": 500,
+    "pricingIsApproximate": true
   },
   {
     "id": "r_truffles",
@@ -237,7 +264,10 @@
       "Comfort food"
     ],
     "hours": "11:00 AM – 11:30 PM",
-    "address": "St Marks Road & Koramangala 4th Block, Bengaluru"
+    "address": "St Marks Road & Koramangala 4th Block, Bengaluru",
+    "typicalSpendMin": 400,
+    "typicalSpendMax": 550,
+    "pricingIsApproximate": true
   },
   {
     "id": "r_burma_burma",
@@ -261,7 +291,10 @@
       "Tea room"
     ],
     "hours": "12:00 PM – 10:30 PM",
-    "address": "12th Main, Indiranagar, Bengaluru 560008"
+    "address": "12th Main, Indiranagar, Bengaluru 560008",
+    "typicalSpendMin": 600,
+    "typicalSpendMax": 800,
+    "pricingIsApproximate": true
   },
   {
     "id": "r_leon_grill",
@@ -285,6 +318,9 @@
       "Quick bite"
     ],
     "hours": "11:30 AM – 1:00 AM",
-    "address": "80 Feet Road, 6th Block, Koramangala, Bengaluru 560095"
+    "address": "80 Feet Road, 6th Block, Koramangala, Bengaluru 560095",
+    "typicalSpendMin": 180,
+    "typicalSpendMax": 280,
+    "pricingIsApproximate": true
   }
 ]

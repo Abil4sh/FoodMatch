@@ -33,6 +33,11 @@ RESTAURANT_FIELDS = (
     "lat",
     "lon",
     "source",
+    # Curated pricing. Always paired with pricingIsApproximate so the UI can
+    # label it rather than presenting it as a verified figure.
+    "typicalSpendMin",
+    "typicalSpendMax",
+    "pricingIsApproximate",
 )
 
 DISH_FIELDS = (
@@ -49,6 +54,7 @@ DISH_FIELDS = (
     "photoLabel",
     "cuisines",
     "veg",
+    "isApproximate",
 )
 
 FRIEND_FIELDS = ("id", "name", "initials", "color", "area")

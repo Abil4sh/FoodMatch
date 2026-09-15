@@ -29,6 +29,7 @@ _DATASETS = {
     "user": "user.json",
     "cravings": "cravings.json",
     "active_match": "activeMatch.json",
+    "areas": "areas.json",
 }
 
 
@@ -93,6 +94,12 @@ def get_cravings() -> list[dict]:
 
 def get_active_match() -> dict:
     return _load("active_match")
+
+
+def get_areas() -> list[dict]:
+    """Curated Bengaluru areas: the popular list, and the offline fallback for
+    location search when no provider key is configured."""
+    return _load("areas")
 
 
 def get_feed() -> dict:

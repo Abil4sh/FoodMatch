@@ -4,6 +4,8 @@ import Create from './screens/Create/Create';
 import Invite from './screens/Invite/Invite';
 import Lobby from './screens/Lobby/Lobby';
 import Swipe from './screens/Swipe/Swipe';
+import Join from './screens/Join/Join';
+import Solo from './screens/Solo/Solo';
 import Match from './screens/Match/Match';
 import Detail from './screens/Detail/Detail';
 import Profile from './screens/Profile/Profile';
@@ -16,10 +18,15 @@ export function AppRoutes() {
     <Routes>
       <Route path="/" element={<Discover />} />
       <Route path="/create" element={<Create />} />
-      <Route path="/invite/:groupId" element={<Invite />} />
-      <Route path="/lobby/:groupId" element={<Lobby />} />
-      <Route path="/swipe/:groupId" element={<Swipe />} />
-      <Route path="/match/:groupId" element={<Match />} />
+      {/* Join by code, or straight from a shared link. */}
+      <Route path="/join" element={<Join />} />
+      <Route path="/join/:code" element={<Join />} />
+      <Route path="/invite/:code" element={<Invite />} />
+      <Route path="/lobby/:code" element={<Lobby />} />
+      {/* Solo browsing needs no group; group swiping is code-scoped. */}
+      <Route path="/browse" element={<Solo />} />
+      <Route path="/swipe/:code" element={<Swipe />} />
+      <Route path="/match/:code" element={<Match />} />
       <Route path="/restaurant/:id" element={<Detail />} />
       <Route path="/groups" element={<Groups />} />
       <Route path="/matches" element={<History />} />

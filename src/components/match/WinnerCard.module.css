@@ -64,6 +64,7 @@
   font-weight: 600;
   color: rgba(251, 247, 241, 0.9);
 }
+.factItem { display: inline-flex; align-items: center; gap: 9px; }
 .dot { width: 3px; height: 3px; border-radius: 50%; background: rgba(251, 247, 241, 0.45); }
 .rating { color: var(--saffron); }
 

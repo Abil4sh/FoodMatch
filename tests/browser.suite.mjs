@@ -33,30 +33,8 @@ page.on('console', (m) => {
 page.on('pageerror', (e) => errors.push('PAGEERROR: ' + e.message));
 
 await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
-await page.evaluate(() => {
-  localStorage.setItem(
-    'foodmatch.match.v1',
-    JSON.stringify({
-      groupId: 'g_drag_test',
-      groupName: 'Friday Dinner',
-      code: 'FM-TEST',
-      creator: 'u_abilash',
-      members: [
-        { id: 'u_abilash', status: 'host' },
-        { id: 'u_rahul', status: 'ready' },
-        { id: 'u_ananya', status: 'ready' }
-      ],
-      preferences: ['p_biryani'],
-      budget: 500,
-      distance: 5,
-      area: 'HSR Layout',
-      phase: 'swiping',
-      votes: {},
-      createdAt: Date.now()
-    })
-  );
-});
-await page.goto(BASE + '/swipe/g_drag_test', { waitUntil: 'networkidle0' });
+await page.evaluate(() => localStorage.clear());
+await page.goto(BASE + '/browse', { waitUntil: 'networkidle0' });
 await new Promise((r) => setTimeout(r, 800));
 
 const state = () =>
@@ -110,14 +88,11 @@ async function drag(dx, { release = true, touch = false } = {}) {
 // --- card 1: drag right ---
 const s0 = await state();
 check('Deck renders three cards', s0.count === 3, String(s0.count));
-const agree = (s) => s.progress?.replace(/ /g, '') === s.youProgress;
-check('Header and your counter agree at start', agree(s0), JSON.stringify([s0.progress, s0.youProgress]));
 check('Progress starts at 0 / 12', s0.progress === '0 / 12', s0.progress);
 const d1 = await drag(200);
 check('Card 1: LIKE stamp appears while dragging', Number(d1.midStamps.find((s) => s.t === 'Like')?.o) > 0.5, JSON.stringify(d1.midStamps));
 check('Card 1: right drag commits', d1.after.progress === '1 / 12', d1.after.progress);
 check('Card 1: next card became active', d1.after.name !== s0.name, `${s0.name} -> ${d1.after.name}`);
-check('Header and your counter agree after a swipe', agree(d1.after), JSON.stringify([d1.after.progress, d1.after.youProgress]));
 
 // --- card 2: drag left (the real test — this instance was previously non-interactive) ---
 const d2 = await drag(-200);
@@ -150,9 +125,6 @@ await new Promise((r) => setTimeout(r, 700));
 const b2 = await state();
 check('PASS button commits', b2.progress === '5 / 12', b2.progress);
 
-const votes = await page.evaluate(() => JSON.parse(localStorage.getItem('foodmatch.match.v1')).votes.u_abilash);
-check('Votes recorded via VOTE', Object.keys(votes).length === 5, JSON.stringify(votes));
-check('Both directions recorded', Object.values(votes).includes('like') && Object.values(votes).includes('pass'), JSON.stringify(votes));
 check('No console errors', errors.length === 0, errors.slice(0, 3).join(' | '));
 
 await page.screenshot({ path: '/tmp/swipe-' + (MOBILE ? 'mobile' : 'desktop') + '.png' });

@@ -177,11 +177,15 @@ export async function run() {
   // deck toggle keeps its own place
   await click(findByExactText('button', 'Dishes'), 'dishes toggle');
   await settle(120);
-  check('Dishes deck starts fresh', text().includes('0 / 12'), text().slice(0, 160));
+  // The dishes deck is the curated menu catalog, which grows as dishes are
+  // added, so assert the shape rather than a fixed size.
+  const dishesTotal = text().match(/0 \/ (\d+)/)?.[1];
+  check('Dishes deck starts fresh', Boolean(dishesTotal), text().slice(0, 160));
+  check('Dishes deck is its own catalog', Number(dishesTotal) >= 12, String(dishesTotal));
   check('Dish card shows a price', /₹\d+/.test(document.querySelector('article').textContent), document.querySelector('article').textContent);
   await click(likeBtn(), 'like on dishes');
   await settle(120);
-  check('Dishes deck advances', text().includes('1 / 12'));
+  check('Dishes deck advances', text().includes('1 / ' + dishesTotal), text().slice(0, 120));
 
   await click(findByExactText('button', 'Restaurants'), 'restaurants toggle');
   await settle(120);

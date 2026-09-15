@@ -50,3 +50,5 @@
   background: var(--cream);
   border-top: 1px solid var(--hairline);
 }
+
+.error { font-size: 13px; color: var(--chilli, #C0392B); text-align: center; }

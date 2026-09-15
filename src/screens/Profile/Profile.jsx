@@ -9,22 +9,19 @@ import { SectionLabel } from '../../components/primitives/SectionLabel';
 import { EmptyState } from '../../components/primitives/EmptyState';
 import { FoodDNA } from '../../components/profile/FoodDNA';
 import { useSession } from '../../store/SessionContext';
-import { useMatch } from '../../store/MatchContext';
 import { readHistory } from '../../services/history';
-import { likedCardIdsFor, computeFoodDNA, computeStats, summarise } from '../../services/profile';
+import { computeFoodDNA, computeStats, summarise } from '../../services/profile';
+import { readLikes } from '../../services/likes';
 import { findCardById } from '../../services/catalog';
 import s from './Profile.module.css';
 
 export default function Profile() {
   const navigate = useNavigate();
   const { user, loading } = useSession();
-  const { group } = useMatch();
 
   const history = useMemo(() => readHistory(), []);
-  const liked = useMemo(
-    () => (user ? likedCardIdsFor(user.id, { group, history }).map(findCardById).filter(Boolean) : []),
-    [user, group, history]
-  );
+  // Everything this browser has liked, solo or in a group.
+  const liked = useMemo(() => readLikes().map(findCardById).filter(Boolean), []);
   const dna = useMemo(() => computeFoodDNA(user?.foodDNA, liked), [user, liked]);
   const stats = useMemo(() => computeStats({ history, liked }), [history, liked]);
 

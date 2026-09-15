@@ -39,6 +39,8 @@ from .validation import (
     validate_radius,
     validate_search_limit,
     validate_search_query,
+    validate_location_limit,
+    validate_location_text,
 )
 
 
@@ -133,11 +135,18 @@ def feed(request):
     """
     data = catalog.get_feed()
 
+    # Optional coordinates let the feed follow the user's selected area rather
+    # than being pinned to one neighbourhood.
+    latitude, longitude = validate_coordinates(
+        request.query_params.get("lat"), request.query_params.get("lng")
+    )
+    radius_m = validate_radius(request.query_params.get("radius")) if request.query_params.get("radius") else restaurant_provider.DEFAULT_RADIUS_M
+
     outcome = restaurant_provider.search_restaurants(
         query="",
-        latitude=None,
-        longitude=None,
-        radius_m=restaurant_provider.DEFAULT_RADIUS_M,
+        latitude=latitude,
+        longitude=longitude,
+        radius_m=radius_m,
         limit=restaurant_provider.DEFAULT_FEED_LIMIT,
     )
 
@@ -191,6 +200,7 @@ def restaurant_detail(request, restaurant_id):
     return Response(
         {
             **serialize_restaurant(record),
+            # 3-4 representative dishes, not a full menu.
             "dishes": [serialize_dish(d) for d in catalog.dishes_for_restaurant(record["id"])],
         }
     )
@@ -240,3 +250,29 @@ def restaurant_search(request):
     if outcome.get("reason"):
         payload["reason"] = outcome["reason"]
     return Response(payload)
+
+
+@api_view(["GET"])
+@throttle_classes([SearchThrottle])
+def location_search(request):
+    """Resolve a typed area name into coordinates.
+
+    Shares the search throttle with restaurant search, because both reach the
+    same upstream provider and should be rationed together. Returns the curated
+    Bengaluru list when no provider is configured.
+    """
+    text = validate_location_text(request.query_params.get("q"))
+    limit = validate_location_limit(request.query_params.get("limit"))
+
+    outcome = restaurant_provider.search_locations(text=text, limit=limit)
+    payload = {"source": outcome["source"], "results": outcome["results"]}
+    if outcome.get("reason"):
+        payload["reason"] = outcome["reason"]
+    return Response(payload)
+
+
+@api_view(["GET"])
+@throttle_classes([CatalogThrottle])
+def popular_areas(request):
+    """The curated shortcut list. Entirely local; makes no outbound request."""
+    return Response({"results": restaurant_provider.popular_areas()})

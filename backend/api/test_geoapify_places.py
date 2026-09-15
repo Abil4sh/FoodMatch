@@ -411,6 +411,154 @@ class DishesRemainLocalTests(GeoapifyStubbed):
         self.assertIsNotNone(dish.get("rating"))
 
 
+# --- location search --------------------------------------------------------
+
+
+@override_settings(ALLOWED_HOSTS=TEST_HOSTS)
+class LocationSearchTests(GeoapifyStubbed):
+    def test_popular_areas_are_local_and_free(self):
+        body = self.client.get("/api/locations/popular/").json()
+        names = [a["name"] for a in body["results"]]
+        self.assertIn("HSR Layout", names)
+        self.assertIn("Koramangala", names)
+        self.assertEqual(self.call_count, 0, "the popular list must not hit the provider")
+
+    def test_popular_areas_carry_coordinates(self):
+        for area in self.client.get("/api/locations/popular/").json()["results"]:
+            self.assertIsInstance(area["latitude"], float)
+            self.assertIsInstance(area["longitude"], float)
+
+    def test_search_without_key_uses_curated_areas(self):
+        body = self.client.get("/api/locations/search/?q=kora").json()
+        self.assertEqual(body["source"], "local")
+        self.assertEqual(body["results"][0]["name"], "Koramangala")
+        self.assertEqual(self.call_count, 0)
+
+    def test_short_or_missing_query_rejected_before_any_call(self):
+        self.assertEqual(self.client.get("/api/locations/search/").status_code, 400)
+        self.assertEqual(self.client.get("/api/locations/search/?q=a").status_code, 400)
+        self.assertEqual(self.call_count, 0)
+
+    def test_overlong_query_rejected_before_any_call(self):
+        self.assertEqual(self.client.get("/api/locations/search/?q=" + "x" * 200).status_code, 400)
+        self.assertEqual(self.call_count, 0)
+
+    def test_search_with_key_calls_autocomplete_once(self):
+        self.use_key()
+        self.responses = [
+            {"results": [{"place_id": "gx", "name": "Whitefield", "suburb": "Whitefield", "city": "Bengaluru", "state": "Karnataka", "lat": 12.9698, "lon": 77.75}]}
+        ]
+        body = self.client.get("/api/locations/search/?q=whitefield").json()
+        self.assertEqual(self.call_count, 1)
+        self.assertEqual(body["source"], "geoapify")
+        self.assertEqual(body["results"][0]["name"], "Whitefield")
+        self.assertTrue(self.calls[0]["url"].startswith("https://api.geoapify.com/v1/geocode/autocomplete?"))
+
+    def test_search_is_filtered_to_india_and_biased_to_bengaluru(self):
+        self.use_key()
+        self.responses = [{"results": []}]
+        self.client.get("/api/locations/search/?q=whitefield")
+        url = urllib.parse.unquote(self.calls[0]["url"])
+        self.assertIn("filter=countrycode:in", url)
+        self.assertIn("bias=proximity:77.5946,12.9716", url)
+
+    def test_provider_failure_falls_back_to_curated_areas(self):
+        self.use_key()
+        self.responses = [urllib.error.HTTPError("u", 429, "rate", {}, None)]
+        body = self.client.get("/api/locations/search/?q=koramangala").json()
+        self.assertEqual(body["source"], "local")
+        self.assertEqual(body["reason"], "rate_limited")
+        self.assertGreater(len(body["results"]), 0)
+
+    def test_empty_upstream_falls_back_to_curated_areas(self):
+        self.use_key()
+        self.responses = [{"results": []}]
+        self.assertEqual(self.client.get("/api/locations/search/?q=koramangala").json()["source"], "local")
+
+    def test_duplicate_localities_are_collapsed(self):
+        self.use_key()
+        dup = {"place_id": "a", "name": "Whitefield", "suburb": "Whitefield", "city": "Bengaluru", "lat": 12.96, "lon": 77.75}
+        self.responses = [{"results": [dup, {**dup, "place_id": "b"}, {**dup, "place_id": "c"}]}]
+        self.assertEqual(len(self.client.get("/api/locations/search/?q=white").json()["results"]), 1)
+
+    def test_results_without_coordinates_are_dropped(self):
+        self.assertIsNone(geoapify_places.to_location({"name": "Nowhere"}))
+        self.assertIsNone(geoapify_places.to_location({"lat": 1, "lon": 2}))
+
+
+# --- feed follows the selected area -----------------------------------------
+
+
+@override_settings(ALLOWED_HOSTS=TEST_HOSTS)
+class FeedLocationTests(GeoapifyStubbed):
+    def setUp(self):
+        super().setUp()
+        self.use_key()
+
+    def test_feed_uses_the_supplied_coordinates(self):
+        self.client.get("/api/feed/?lat=12.9352&lng=77.6245")
+        url = urllib.parse.unquote(self.calls[0]["url"])
+        self.assertIn("filter=circle:77.6245,12.9352", url)
+
+    def test_feed_without_coordinates_uses_the_default_centre(self):
+        self.client.get("/api/feed/")
+        url = urllib.parse.unquote(self.calls[0]["url"])
+        self.assertIn("filter=circle:77.6446,12.9121", url)
+
+    def test_feed_rejects_invalid_coordinates_before_calling(self):
+        self.assertEqual(self.client.get("/api/feed/?lat=999&lng=77").status_code, 400)
+        self.assertEqual(self.call_count, 0)
+
+    def test_changing_area_produces_a_different_upstream_call(self):
+        self.responses = [{"features": [SAMPLE_FEATURE]}, {"features": [SAMPLE_FEATURE]}]
+        self.client.get("/api/feed/?lat=12.9352&lng=77.6245")
+        self.client.get("/api/feed/?lat=12.9698&lng=77.7500")
+        self.assertEqual(self.call_count, 2, "each area should be fetched once")
+        self.assertNotEqual(self.calls[0]["url"], self.calls[1]["url"])
+
+
+# --- curated menu data ------------------------------------------------------
+
+
+class MenuDataTests(SimpleTestCase):
+    def test_every_curated_restaurant_has_representative_dishes(self):
+        from api.services import catalog
+
+        for restaurant in catalog.get_restaurants():
+            dishes = catalog.dishes_for_restaurant(restaurant["id"])
+            self.assertGreaterEqual(len(dishes), 3, f"{restaurant['id']} has too few dishes")
+            self.assertLessEqual(len(dishes), 6, f"{restaurant['id']} is becoming a full menu")
+
+    def test_every_curated_dish_is_flagged_approximate(self):
+        from api.services import catalog
+
+        for dish in catalog.get_dishes():
+            self.assertTrue(dish.get("isApproximate"), f"{dish['id']} is not flagged approximate")
+            self.assertIsInstance(dish.get("price"), int)
+
+    def test_curated_restaurants_declare_a_typical_spend(self):
+        from api.services import catalog
+
+        for restaurant in catalog.get_restaurants():
+            self.assertIsNotNone(restaurant.get("typicalSpendMin"), restaurant["id"])
+            self.assertLess(restaurant["typicalSpendMin"], restaurant["typicalSpendMax"])
+            self.assertTrue(restaurant.get("pricingIsApproximate"))
+
+    def test_dishes_reference_a_real_restaurant(self):
+        from api.services import catalog
+
+        ids = {r["id"] for r in catalog.get_restaurants()}
+        for dish in catalog.get_dishes():
+            self.assertIn(dish["restaurantId"], ids, f"{dish['id']} points at a missing restaurant")
+            self.assertTrue(dish.get("restaurantName"))
+
+    def test_dish_ids_are_unique_and_stable(self):
+        from api.services import catalog
+
+        ids = [d["id"] for d in catalog.get_dishes()]
+        self.assertEqual(len(ids), len(set(ids)), "duplicate dish ids would break vote records")
+
+
 # --- provider boundary ------------------------------------------------------
 
 

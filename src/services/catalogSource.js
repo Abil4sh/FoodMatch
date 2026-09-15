@@ -29,6 +29,11 @@ import localActiveMatch from '../data/activeMatch.json';
 
 export const SOURCE = { API: 'api', LOCAL: 'local' };
 
+/** The curated catalog, always available for id lookups. */
+export function referenceRestaurants() {
+  return normalizeRestaurants(localRestaurants);
+}
+
 /** The same shape `/api/feed/` returns, built from the bundled JSON. */
 function localBundle() {
   return {
@@ -46,9 +51,9 @@ function localBundle() {
 /**
  * @returns {Promise<{source, user, friends, feed, error}>} never rejects
  */
-export async function loadCatalog() {
+export async function loadCatalog(location) {
   try {
-    const [user, feed, friends] = await Promise.all([api.getMe(), api.getFeed(), api.getFriends()]);
+    const [user, feed, friends] = await Promise.all([api.getMe(), api.getFeed(location), api.getFriends()]);
 
     // A reachable API that returns an empty catalog is not usable; treat it
     // the same as unreachable rather than rendering an empty app.

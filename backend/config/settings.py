@@ -74,9 +74,43 @@ TEMPLATES = [
     }
 ]
 
-# No models, no user accounts, no sessions at this stage: the catalog is
-# read-only JSON. A database is therefore not configured.
-DATABASES = {}
+# --- database ---------------------------------------------------------------
+#
+# SQLite locally so `manage.py runserver` needs no setup, PostgreSQL in
+# production via DATABASE_URL. Parsed here rather than adding a dependency for
+# ten lines of urllib.
+
+
+def database_from_url(url: str) -> dict | None:
+    """Parse a postgres://user:pass@host:port/name URL into Django's config."""
+    from urllib.parse import unquote, urlparse
+
+    if not url:
+        return None
+    parsed = urlparse(url)
+    if parsed.scheme not in ("postgres", "postgresql", "psql"):
+        return None
+    return {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": unquote(parsed.path.lstrip("/")),
+        "USER": unquote(parsed.username or ""),
+        "PASSWORD": unquote(parsed.password or ""),
+        "HOST": parsed.hostname or "",
+        "PORT": str(parsed.port or ""),
+        # Managed Postgres almost always requires TLS; opt out explicitly.
+        "OPTIONS": {"sslmode": os.getenv("DJANGO_DB_SSLMODE", "require")},
+        "CONN_MAX_AGE": int(os.getenv("DJANGO_DB_CONN_MAX_AGE", "60")),
+    }
+
+
+_database = database_from_url(os.getenv("DATABASE_URL", ""))
+DATABASES = {
+    "default": _database
+    or {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / os.getenv("DJANGO_SQLITE_NAME", "db.sqlite3"),
+    }
+}
 
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -90,7 +124,20 @@ CORS_ALLOWED_ORIGINS = env_list(
     "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174",
 )
 CORS_ALLOW_CREDENTIALS = False
-CORS_ALLOW_METHODS = ["GET", "OPTIONS"]
+CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS"]
+
+# The participant token travels in a custom header, so it must be named here or
+# the browser's preflight rejects every group request.
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "origin",
+    "user-agent",
+    "x-requested-with",
+    "x-foodmatch-participant",
+]
 
 # --- CSRF -------------------------------------------------------------------
 
@@ -118,6 +165,11 @@ REST_FRAMEWORK = {
         # Deliberately the tightest scope: this is the only endpoint that can
         # reach a paid upstream API, so it is the one worth rationing.
         "search": os.getenv("DJANGO_THROTTLE_SEARCH", "15/min"),
+        # Group sessions. Writes are rationed, reads are generous because the
+        # lobby polls, and voting is bounded by deck size anyway.
+        "group_write": os.getenv("DJANGO_THROTTLE_GROUP_WRITE", "30/min"),
+        "group_read": os.getenv("DJANGO_THROTTLE_GROUP_READ", "240/min"),
+        "vote": os.getenv("DJANGO_THROTTLE_VOTE", "120/min"),
     },
     "EXCEPTION_HANDLER": "api.views.safe_exception_handler",
 }

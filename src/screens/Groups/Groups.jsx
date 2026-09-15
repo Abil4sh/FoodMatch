@@ -2,28 +2,25 @@ import { useNavigate } from 'react-router-dom';
 import { PhoneShell } from '../../components/layout/PhoneShell';
 import { ScreenHeader } from '../../components/layout/ScreenHeader';
 import { Button } from '../../components/primitives/Button';
-import { AvatarStack } from '../../components/primitives/AvatarStack';
 import { MatchMeter } from '../../components/primitives/MatchMeter';
 import { SectionLabel } from '../../components/primitives/SectionLabel';
 import { EmptyState } from '../../components/primitives/EmptyState';
-import { useSession } from '../../store/SessionContext';
-import { useMatch, PHASE } from '../../store/MatchContext';
+import { useGroup, GROUP_STATUS } from '../../store/GroupContext';
 import s from './Groups.module.css';
 
 const STAGE = {
-  [PHASE.INVITING]: { label: 'Waiting on invites', cta: 'Invite friends', to: (g) => '/invite/' + g.groupId },
-  [PHASE.LOBBY]: { label: 'In the lobby', cta: 'Back to the lobby', to: (g) => '/lobby/' + g.groupId },
-  [PHASE.SWIPING]: { label: 'Swiping', cta: 'Continue swiping', to: (g) => '/swipe/' + g.groupId },
-  [PHASE.MATCHED]: { label: 'Matched', cta: 'See your match', to: (g) => '/match/' + g.groupId }
+  [GROUP_STATUS.LOBBY]: { label: 'Waiting on invites', cta: 'Invite friends', to: (c) => '/invite/' + c },
+  [GROUP_STATUS.SWIPING]: { label: 'Swiping', cta: 'Continue swiping', to: (c) => '/swipe/' + c },
+  [GROUP_STATUS.COMPLETED]: { label: 'Matched', cta: 'See your match', to: (c) => '/match/' + c }
 };
 
 export default function Groups() {
   const navigate = useNavigate();
-  const { getPerson } = useSession();
-  const { group, members, readyCount, readyPct } = useMatch();
+  const { group, code, participants, status } = useGroup();
 
-  const stage = group ? STAGE[group.phase] || STAGE[PHASE.INVITING] : null;
-  const people = members.map((m) => getPerson(m.id)).filter(Boolean);
+  const stage = group ? STAGE[status] || STAGE[GROUP_STATUS.LOBBY] : null;
+  const finished = participants.filter((p) => p.state === 'finished').length;
+  const readyPct = participants.length ? Math.round((finished / participants.length) * 100) : 0;
 
   return (
     <PhoneShell header={<ScreenHeader eyebrow="Groups" title="Your FoodMatch" />}>
@@ -34,21 +31,21 @@ export default function Groups() {
               <div className={s.top}>
                 <div>
                   <SectionLabel tone="onInk">{stage.label}</SectionLabel>
-                  <h2 className={s.name}>{group.groupName}</h2>
+                  <h2 className={s.name}>{group.name}</h2>
                   <p className={s.meta}>
-                    {members.length} {members.length === 1 ? 'person' : 'people'} &middot; code {group.code}
+                    {participants.length} {participants.length === 1 ? 'person' : 'people'} &middot; code {group.code}
                   </p>
                 </div>
-                <AvatarStack people={people} max={3} ring="ink" />
+
               </div>
               <MatchMeter value={readyPct} tone="ink" label="Group readiness" />
               <p className={s.metaSmall}>
-                {readyCount} of {members.length} ready &middot; {group.area}
+                {finished} of {participants.length} finished &middot; {group.area?.name || ''}
               </p>
             </div>
 
             <div className={s.actions}>
-              <Button onClick={() => navigate(stage.to(group))}>{stage.cta}</Button>
+              <Button onClick={() => navigate(stage.to(code))}>{stage.cta}</Button>
               <Button variant="quiet" onClick={() => navigate('/create')}>
                 Start a new FoodMatch
               </Button>

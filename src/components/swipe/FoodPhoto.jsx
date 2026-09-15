@@ -10,7 +10,26 @@ import s from './FoodPhoto.module.css';
  * the swipe deck has to change.
  */
 
+// Includes the cuisine labels derived from OpenStreetMap category keys
+// (catering.restaurant.<cuisine>), which is what a live provider returns.
 const CUISINE_MOTIF = {
+  Indian: 'thali',
+  Italian: 'pizza',
+  Burger: 'burger',
+  Kebab: 'kebab',
+  Asian: 'noodles',
+  Thai: 'noodles',
+  Noodle: 'noodles',
+  Sushi: 'noodles',
+  Regional: 'thali',
+  'Ice Cream': 'dessert',
+  Coffee_Shop: 'dessert',
+  Bakery: 'dessert',
+  Seafood: 'kebab',
+  Barbecue: 'kebab',
+  Chicken: 'kebab',
+  Sandwich: 'burger',
+  Restaurant: 'thali',
   Japanese: 'noodles',
   Ramen: 'noodles',
   Chinese: 'noodles',

@@ -1,8 +1,25 @@
+import { Fragment } from 'react';
 import { motion, useMotionValue, useTransform, useReducedMotion } from 'framer-motion';
 import { FoodPhoto } from './FoodPhoto';
 import { cx } from '../primitives/cx';
 import { LIKE, PASS, decideSwipe } from '../../hooks/useSwipeDeck';
+import { factList, ratingText, distanceText, priceForTwoText, priceText } from '../../services/fields';
 import s from './SwipeCard.module.css';
+
+/** Renders only the facts that exist, with separators between them. */
+function Facts({ items }) {
+  if (items.length === 0) return null;
+  return (
+    <div className={s.facts}>
+      {items.map((text, i) => (
+        <Fragment key={text}>
+          {i > 0 && <span className={s.dot} />}
+          <span className={String(text).startsWith('\u2605') ? s.rating : undefined}>{text}</span>
+        </Fragment>
+      ))}
+    </div>
+  );
+}
 
 function Meta({ item }) {
   if (item.type === 'dish') {
@@ -15,13 +32,9 @@ function Meta({ item }) {
         <p className={s.sub}>
           {item.restaurantName} &middot; {item.cuisines[0]}
         </p>
-        <div className={s.facts}>
-          <span className={s.price}>&#8377;{item.price}</span>
-          <span className={s.dot} />
-          <span className={s.rating}>&#9733; {item.rating}</span>
-          <span className={s.dot} />
-          <span>{item.distanceKm} km</span>
-        </div>
+        <Facts
+          items={factList(priceText(item.price), ratingText(item.rating), distanceText(item.distanceKm))}
+        />
       </>
     );
   }
@@ -32,13 +45,17 @@ function Meta({ item }) {
       <p className={s.sub} title={item.cuisines.join(' \u00B7 ') + ' \u00B7 ' + item.area}>
         {item.cuisines[0]} &middot; {item.area}
       </p>
-      <div className={s.facts}>
-        <span className={s.rating}>&#9733; {item.rating}</span>
-        <span className={s.dot} />
-        <span>{item.distanceKm} km</span>
-        <span className={s.dot} />
-        <span>&#8377;{item.priceForTwo} for two</span>
-      </div>
+      {/* Typical spend per person is more useful than price-for-two, so it
+          wins when we have it. The hero card stays to three facts either way. */}
+      <Facts
+        items={factList(
+          ratingText(item.rating),
+          distanceText(item.distanceKm),
+          item.typicalSpendMin
+            ? `\u20B9${item.typicalSpendMin}\u2013\u20B9${item.typicalSpendMax} pp`
+            : priceForTwoText(item.priceForTwo)
+        )}
+      />
     </>
   );
 }

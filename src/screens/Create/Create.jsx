@@ -7,7 +7,7 @@ import { Chip } from '../../components/primitives/Chip';
 import { Segmented } from '../../components/primitives/Segmented';
 import { SectionLabel } from '../../components/primitives/SectionLabel';
 import { useSession } from '../../store/SessionContext';
-import { useMatch, newGroupIdentity } from '../../store/MatchContext';
+import { useGroup } from '../../store/GroupContext';
 import options from '../../data/matchOptions.json';
 import s from './Create.module.css';
 
@@ -25,8 +25,8 @@ const CRAVING_TO_PREFERENCE = {
 export default function Create() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { user } = useSession();
-  const { createGroup } = useMatch();
+  const { user, location } = useSession();
+  const { createGroup: createRealGroup, busy, error } = useGroup();
 
   const craving = params.get('craving');
   const seeded = CRAVING_TO_PREFERENCE[craving];
@@ -45,19 +45,20 @@ export default function Create() {
   const budgetNote = options.budgets.find((b) => b.value === budget)?.note;
   const distanceNote = options.distances.find((d) => d.value === distance)?.note;
 
-  function handleContinue() {
-    if (!ready || !user) return;
-    const identity = newGroupIdentity(trimmed);
-    createGroup({
-      ...identity,
-      name: trimmed,
-      creator: user.id,
-      preferences,
-      budget,
-      distance,
-      area: user.area
-    });
-    navigate('/invite/' + identity.groupId);
+  async function handleContinue() {
+    if (!ready || !user || busy) return;
+
+    try {
+      const group = await createRealGroup({
+        name: trimmed,
+        displayName: user.name || 'Host',
+        mode: 'restaurants',
+        location
+      });
+      navigate('/invite/' + group.code);
+    } catch {
+      // The error is surfaced below; the user can retry without losing input.
+    }
   }
 
   return (
@@ -65,8 +66,13 @@ export default function Create() {
       header={<ScreenHeader eyebrow="Step 1 of 3" title="Create FoodMatch" />}
       footer={
         <div className={s.footer}>
-          <Button onClick={handleContinue} disabled={!ready}>
-            Continue to invites
+          {error && (
+            <p className={s.error} role="alert">
+              {error}
+            </p>
+          )}
+          <Button onClick={handleContinue} disabled={!ready || busy}>
+            {busy ? 'Creating\u2026' : 'Continue to invites'}
           </Button>
         </div>
       }

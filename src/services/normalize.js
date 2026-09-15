@@ -19,6 +19,19 @@ const num = (value, fallback = 0) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+/**
+ * For fields a live provider may genuinely not have.
+ *
+ * Geoapify returns OpenStreetMap data with no rating, review count or price.
+ * Coercing those to 0 would render "★ 0" and "₹0 for two" as though they were
+ * real, so they stay null and the UI omits them.
+ */
+const numOrNull = (value) => {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 const str = (value, fallback = '') => (typeof value === 'string' ? value : fallback);
 const list = (value) => (Array.isArray(value) ? value.filter((v) => typeof v === 'string') : []);
 
@@ -30,17 +43,26 @@ export function normalizeRestaurant(raw) {
     name: str(raw.name, 'Unnamed place'),
     cuisines: list(raw.cuisines),
     area: str(raw.area),
-    distanceKm: num(raw.distanceKm),
-    etaMin: num(raw.etaMin),
-    rating: num(raw.rating),
-    reviews: num(raw.reviews),
-    priceForTwo: num(raw.priceForTwo),
-    priceTier: num(raw.priceTier, 1),
+    distanceKm: numOrNull(raw.distanceKm),
+    etaMin: numOrNull(raw.etaMin),
+    rating: numOrNull(raw.rating),
+    reviews: numOrNull(raw.reviews),
+    priceForTwo: numOrNull(raw.priceForTwo),
+    priceTier: numOrNull(raw.priceTier),
     photoLabel: str(raw.photoLabel),
-    groupMatchPct: num(raw.groupMatchPct),
+    groupMatchPct: numOrNull(raw.groupMatchPct),
     tags: list(raw.tags),
     hours: str(raw.hours),
-    address: str(raw.address)
+    address: str(raw.address),
+    // Present on provider-sourced records only.
+    lat: numOrNull(raw.lat),
+    lon: numOrNull(raw.lon),
+    source: str(raw.source, 'local'),
+    // Curated pricing. Null when we have no menu data for this place, which
+    // is the normal case for a live provider result.
+    typicalSpendMin: numOrNull(raw.typicalSpendMin),
+    typicalSpendMax: numOrNull(raw.typicalSpendMax),
+    pricingIsApproximate: raw.pricingIsApproximate === true
   };
 }
 
@@ -59,7 +81,9 @@ export function normalizeDish(raw) {
     etaMin: num(raw.etaMin),
     photoLabel: str(raw.photoLabel),
     cuisines: list(raw.cuisines),
-    veg: raw.veg === true
+    veg: raw.veg === true,
+    // Curated prices are representative, never scraped from a live menu.
+    isApproximate: raw.isApproximate !== false
   };
 }
 

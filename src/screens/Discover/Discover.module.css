@@ -101,3 +101,7 @@
   font-size: 12px;
   color: var(--muted);
 }
+
+/* the location header is now a button; keep it visually identical */
+.place { text-align: left; background: none; border: 0; padding: 0; cursor: pointer; }
+.place:hover .placeName { color: var(--amber-ink); }
