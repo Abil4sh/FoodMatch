@@ -15,6 +15,9 @@ Instead of relying on AI recommendations, FoodMatch lets each person independent
 **[Try FoodMatch](https://foodmatch-gray.vercel.app)**
 
 > The backend runs on Render's free tier, so the first request after inactivity may take a little longer.
+> <img width="1439" height="809" alt="Screenshot 2026-09-15 at 9 25 22 PM" src="https://github.com/user-attachments/assets/b0a93d57-d851-4bf7-b4f5-8910f4c97881" />
+<img width="928" height="793" alt="Screenshot 2026-09-15 at 9 26 21 PM" src="https://github.com/user-attachments/assets/a506212a-eb65-48cc-8886-d3ed692d891f" />
+
 
 ---
 
