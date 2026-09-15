@@ -1,406 +1,561 @@
-# FoodMatch
+# FoodMatch 🍜
 
-Swipe on food with friends and let the group decide where to eat.
+> **You choose. Your friends choose. FoodMatch finds the match.**
 
-## What is FoodMatch?
+FoodMatch is a full-stack restaurant discovery platform that helps you and your friends decide where to eat based on what **everyone actually wants**.
 
-Picking a restaurant with a group is a coordination problem disguised as a
-casual question. Somebody suggests a place, somebody else has been there twice
-this week, a third person is vegetarian, and twenty minutes later the group
-chat has produced nothing but a link to the same biryani place as always.
+Instead of relying on AI recommendations, FoodMatch lets each person independently swipe on restaurants and dishes, then finds the overlap between everyone's choices.
 
-FoodMatch replaces that negotiation with a swipe. Everyone in the group swipes
-independently through the same deck of restaurants or dishes, nobody sees
-anybody else's votes while they choose, and when everyone is done the app
-scores each option by how much of the group agreed on it. The result is a
-ranked answer with a percentage attached, so the decision comes from what the
-group actually wanted rather than from whoever argued hardest.
+**SWIPE → MATCH → EAT**
 
-The mock data is set in Bengaluru.
+---
 
-## Core flow
+## 🚀 Live Demo
 
-```
-SWIPE  →  MATCH  →  EAT
-```
+**[Try FoodMatch](https://foodmatch-gray.vercel.app)**
 
-In full:
+> The backend runs on Render's free tier, so the first request after inactivity may take a little longer.
 
-```
-Discover → Create FoodMatch → Invite Friends → Lobby → Swipe
-        → Match Reveal → Restaurant/Dish Detail
-```
+---
 
-## Features
+## 🎯 The Problem
 
-- **Real group sessions** — create a FoodMatch, share a six-character code, friends
-  join anonymously with no account, everyone swipes independently and the server
-  computes the overlap
-- **Solo browsing** — no group required: pick an area and swipe through
-  restaurants or dishes on your own
-- **Restaurant and dish swiping** — draggable card deck with like/pass, separate decks for restaurants and dishes
-- **Group consensus scoring** — a transparent, explainable percentage per option
-- **Match reveal** — the winning place with who liked it, plus runners-up
-- **Restaurant and dish details** — rating, price, distance, address, related dishes
-- **Food DNA** — a taste profile derived from what you have actually liked
-- **Match history** — past matches with their winners, stored locally
-- **Responsive UI** — mobile-first, with a phone-frame presentation on desktop
-- **Accessibility** — keyboard focus states, labelled controls, WCAG AA text contrast, reduced-motion support
+Choosing a restaurant with a group can be surprisingly difficult.
 
-## Tech stack
+One person wants ramen. Another wants pizza. Someone wants something vegetarian. Someone else says, "I'm fine with anything."
 
-**Frontend**
+Most restaurant apps focus on **individual discovery**.
 
-- React 18, Vite 5
-- JavaScript (JSX) — no TypeScript
-- React Router 6
-- CSS Modules with a shared design-token layer
-- React Context + `useReducer` for state
-- Framer Motion for the swipe gestures and reveal animation
+FoodMatch focuses on **group decision-making**.
 
-**Backend**
+Everyone gets to make their own choice independently, and FoodMatch finds the overlap.
 
-- Python 3.12, Django 6, Django REST Framework
-- django-cors-headers, python-dotenv
+---
 
-The catalog is served by the Django API from local JSON. There is no database
-and no third-party API: **no Google Maps or Places integration exists at this
-stage**, by design. The only external request the app makes is a Google Fonts
-stylesheet, which carries no key and no billing.
+## 💡 The Core Idea
 
-## Architecture
+FoodMatch doesn't try to predict what you will like.
 
-**State.** `GroupContext` holds the live session: it stores the participant
-token, mirrors what the server reports, and sends intent. It never computes a
-result. `SessionContext` owns the catalog and the selected area.
+It asks you.
 
-**The backend is authoritative.** Group membership, the deck, every vote and the
-final ranking live in the database. The client cannot assert who is in a group
-or what won.
+Each person swipes through the same set of restaurants or dishes:
 
-```
-React (Vercel)
-   │  HTTPS, participant token in X-FoodMatch-Participant
-   ▼
-Django REST API  ──▶  PostgreSQL   (groups, participants, deck, votes)
-   │
-   └─▶ Geoapify   (restaurant discovery, location search; key server-side)
-           ↘ local JSON catalog fallback
-```
+- ❤️ Like
+- ❌ Pass
 
-**Swipe deck.** `useSwipeDeck` owns deck state and nothing else — no DOM, no
-motion values. The current index is *derived* from the votes already in
-context rather than stored separately, so a refresh or a switch between the
-restaurant and dish decks resumes exactly where you left off. The pointer
-position lives inside `SwipeCard` as a Framer motion value so dragging never
-re-renders the deck. Gestures and the on-screen buttons commit through the
-same `swipe(dir)` function.
+Once everyone has voted, FoodMatch calculates which options have the strongest agreement.
 
-**Matching engine.** `backend/api/services/group_matching.py` is a pure function
-of `(cards, votes, participants)`. No ORM objects, no clock, no randomness, so
-the same input always produces the same ranking — and a result can be explained
-and reproduced.
+The result is not an AI prediction.
 
-**Services.** Data access is kept out of the UI. `catalog.js` resolves card
-ids, `deck.js` builds and orders a deck, `profile.js` derives Food DNA and
-stats, `simulateVotes.js` stands in for other members, `history.js` persists
-completed matches.
+It is the group's actual preference.
 
-**Backend.** A read-only Django REST API serves the catalog. `api/services/catalog.py`
-is the single data-access seam — views never read files themselves — so a future
-`google_places.py` can replace the source without touching views, serializers or
-React. Requests are validated at the boundary (id format, result limits), errors
-are returned as clean JSON with no tracebacks or filesystem paths, CORS is
-restricted to explicit origins, and DRF throttling is configured per endpoint.
-There are no routes that accept a URL or an upstream service name, so the API
-cannot be used as a proxy.
+> **FoodMatch doesn't decide what you should eat. You and your friends do.**
 
-**Request discipline.** The frontend performs exactly one `fetch`, in
-`services/api.js`, and boots with three calls. The catalog is then held in
-memory by `services/catalogStore.js`, so rendering cards, swiping, opening a
-detail screen and navigating between loaded screens all make **zero** further
-requests. This is enforced by a test, not just by convention.
+---
 
-**Persistence.** Group state is in the database. The browser keeps only small
-personal items in `localStorage`: `foodmatch.session.v1` (which group this
-browser belongs to, and its participant token), `foodmatch.location.v1` (the
-selected area), `foodmatch.likes.v1` (the Food DNA trail) and
-`foodmatch.history.v1` (past results).
+# 🔄 Product Flow
 
-**Polling, not WebSockets.** The lobby refreshes every 3s and the swipe screen
-every 5s. Polling stops when the group completes and pauses when the tab is
-hidden. A socket layer would add deployment complexity for very little here.
+## 👤 Solo Mode
 
-## Matching algorithm
+Solo mode lets a user discover restaurants without creating a group.
 
-```
-Group Match % = (participants who liked it / participants who voted on it) × 100
-```
+```text
+Open FoodMatch
+      ↓
+Choose Location
+      ↓
+Choose Restaurants / Dishes
+      ↓
+Browse Swipe Deck
+      ↓
+Like / Pass
+      ↓
+Open Restaurant
+      ↓
+View Details
+      ↓
+Get Directions
+Solo mode does not require a group or account.
+👥 Group Mode
+The core FoodMatch experience is collaborative.
+Create FoodMatch
+      ↓
+Generate 6-Character Group Code
+      ↓
+Share Code With Friends
+      ↓
+Friends Join Anonymously
+      ↓
+Everyone Enters Lobby
+      ↓
+Group Starts
+      ↓
+Backend Resolves Shared Deck
+      ↓
+Everyone Receives The Same Cards
+      ↓
+Each Person Swipes Independently
+      ↓
+Votes Stored In Backend
+      ↓
+Backend Calculates Group Overlap
+      ↓
+Results Ranked
+      ↓
+Match Reveal
+      ↓
+Restaurant Details
+      ↓
+Directions
+      ↓
+🍜 Eat
+Example
+Abilash   ❤️ Ramen House
+Rahul     ❤️ Ramen House
+Ananya    ❤️ Ramen House
+Rohan     ❌ Ramen House
+FoodMatch can reveal:
+3 / 4 PEOPLE MATCHED
 
-The denominator is the people who actually voted on *that card*. A card the
-last two people never reached is not punished for their absence; what matters
-is agreement among those who expressed an opinion. Every result also carries
-`votedBy` and `totalParticipants`, so the UI can be honest about sample size —
-"3 of 4 people matched" is shown alongside the percentage.
+Ramen House
 
-Worked example, four members:
+91% GROUP MATCH
+The group can see who matched with the restaurant and why it ranked highly.
+🧩 How Group Sessions Work
+FoodMatch uses real backend state instead of simulated friend voting.
+1. Create
+A user creates a FoodMatch group.
+The backend generates a unique six-character group code.
 
-| Member | Vote |
-| --- | --- |
-| You | like |
-| Rahul | like |
-| Ananya | like |
-| Rohan | pass |
+FM7K2Q
+2. Join
+Friends enter the code and choose a display name.
+No traditional account or password is required.
 
-3 likes ÷ 4 members = **75% group match**.
+Each participant receives an opaque participant token that identifies them within that session.
 
-Ties break in this order:
+3. Start
+Once the group starts, the backend resolves the restaurant deck.
+The deck is then frozen so every participant receives the same set of cards.
 
-1. **Group score** — the consensus percentage
-2. **Number of likes** — a 3/3 beats a 1/1
-3. **How many voted** — a wider sample is a stronger signal
-4. **Rating** — the better-reviewed option
-5. **Distance** — the nearer option
+4. Vote
+Each participant independently submits:
+LIKE
+or
+PASS
+Votes are sent to Django and stored in PostgreSQL.
+5. Match
+The backend calculates the group overlap.
+The frontend does not decide the final ranking.
 
-Original deck order is the final fallback, so the sort is total and deterministic.
+6. Reveal
+The frontend receives the ranked results and presents the strongest matches.
+🧮 Matching Algorithm
+FoodMatch intentionally uses a simple, deterministic matching algorithm instead of AI.
+For each restaurant or dish:
 
-This is deliberately arithmetic, not machine learning. Anyone should be able to
-read the number off the page and check it by hand.
+Match % = Likes / Participants Who Voted × 100
+For example:
+4 participants voted
 
-**Every vote is real.** There is no simulated friend voting anywhere in the
-group flow. Restaurants come from Geoapify (or the bundled catalog when no key
-is set); dishes and prices are curated and labelled approximate.
+3 people liked Ramen House
 
-## Project structure
+Match % = 3 / 4 × 100
+         = 75%
+Results are ranked using deterministic tie-breakers:
+1. Match score
+2. Number of likes
+3. Number of voters
+4. Rating
+5. Distance
+6. Original deck order
+This makes every result:
+Explainable
+Reproducible
+Based on real group preferences
+Independent of an AI recommendation model
+The Django backend is authoritative for votes and matching.
+🏗 Technical Architecture
+                         ┌─────────────────────┐
+                         │       Vercel        │
+                         │    React + Vite     │
+                         └──────────┬──────────┘
+                                    │
+                              REST API
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │       Render        │
+                         │     Django API      │
+                         └──────────┬──────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    │                               │
+                    ▼                               ▼
+          ┌──────────────────┐             ┌──────────────────┐
+          │ Neon PostgreSQL  │             │     Geoapify     │
+          │                  │             │   Places API     │
+          │ Groups           │             │                  │
+          │ Participants     │             │ Restaurants      │
+          │ Deck Cards       │             │ Location Data    │
+          │ Votes            │             └──────────────────┘
+          └──────────────────┘
+🔁 Data Flow
+Restaurant Discovery
+User
+ ↓
+React Frontend
+ ↓
+Django API
+ ↓
+Geoapify Places API
+ ↓
+Restaurant Results
+ ↓
+Django Normalization
+ ↓
+React Restaurant Cards
+The Geoapify API key remains on the backend and is never exposed to the browser.
+Group Voting
+Participant
+     ↓
+React Swipe Interface
+     ↓
+Django Vote Endpoint
+     ↓
+Vote Validation
+     ↓
+PostgreSQL
+     ↓
+Matching Engine
+     ↓
+Ranked Results
+     ↓
+React Match Reveal
+The backend is the source of truth for group results.
+Location Flow
+User
+ ↓
+Location Selector
+ ↓
+Curated Area / Location Search
+ ↓
+Selected Coordinates
+ ↓
+Django Feed
+ ↓
+Geoapify Restaurant Search
+ ↓
+Restaurant Cards
+FoodMatch also has a bundled local catalog that can be used when the external restaurant API is unavailable.
+Directions Flow
+Restaurant
+     ↓
+Coordinates / Address
+     ↓
+FoodMatch Directions Service
+     ↓
+Keyless Google Maps URL
+     ↓
+Google Maps
+Directions do not require a Google Maps API key or Google Cloud billing.
+🧠 Backend Design
+The group system is backed by real Django models and database state rather than simulated frontend state.
+The core entities are:
 
-```
-src/
-  components/
-    cards/         MemberRow, RestaurantRow
-    layout/        PhoneShell, ScreenHeader, TabBar
-    match/         WinnerCard, ResultRow
-    primitives/    Button, Chip, Avatar, MatchMeter, EmptyState, …
-    profile/       FoodDNA
-    swipe/         SwipeCard, FoodPhoto
-  data/            restaurants, dishes, friends, user, cravings, matchOptions
-  hooks/           useSwipeDeck, useMatchResult, useSimulatedFriends,
-                   useSimulatedProgress
-  screens/         Discover, Create, Invite, Lobby, Swipe, Match, Detail,
-                   Profile, History, Groups, NotFound
-  services/        matchEngine, catalog, deck, profile, simulateVotes,
-                   history, api
-  store/           MatchContext, SessionContext
-  styles/          tokens.css, base.css
-tests/             engine and profile unit tests, browser suites
-backend/
-  manage.py
-  requirements.txt
-  .env.example     template only; never contains a real value
-  config/          settings, urls, wsgi
-  api/
-    urls.py        fixed routes; no URL or service name is ever a parameter
-    models.py      FoodMatchGroup, Participant, DeckCard, Vote
-    views.py       catalog + location endpoints, throttled, safe error handler
-    group_views.py group sessions: create, join, start, deck, vote, finish, results
-    serializers.py explicit field allowlists
-    validation.py  id format and result-count limits
-    services/
-      catalog.py         the single local data-access seam
-      geoapify_places.py the only module that talks to Geoapify
-      restaurant_provider.py  provider-neutral boundary + local fallback
-      group_matching.py  pure, deterministic ranking
-    data/          restaurants, dishes, friends, user, cravings
-    tests.py
-```
+FoodMatchGroup
+       │
+       ├── Participants
+       │
+       └── Deck Cards
+               │
+               └── Votes
+FoodMatchGroup
+Represents a group decision session.
+Participant
+Represents an anonymous person inside a group.
+Participants use an opaque token instead of a traditional login system.
 
-## Running locally
+DeckCard
+Represents a restaurant or dish included in the group's shared voting deck.
+Vote
+Stores a participant's decision for a specific card.
+Duplicate votes are prevented at the database level.
 
-FoodMatch now needs **two** processes: the Django API and the Vite dev server.
+🔐 Anonymous Participation
+FoodMatch intentionally does not require traditional user accounts for the group experience.
+The flow is:
 
-**1. Backend** (first terminal), from the project root:
+Enter Group Code
+       ↓
+Choose Display Name
+       ↓
+Receive Participant Token
+       ↓
+Vote
+This keeps the core experience frictionless.
+A permanent account system is not required for the core FoodMatch experience.
 
-```bash
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python manage.py runserver
-```
+📍 Location System
+FoodMatch includes location-aware restaurant discovery.
+Users can:
 
-```bash
-python manage.py migrate      # creates db.sqlite3 locally
-python manage.py runserver
-```
+Select a location
+Search locations
+Choose from curated Bengaluru areas
+Discover restaurants around the selected location
+The application stores the selected location locally so it can be reused during the session.
+🍽️ Restaurants & Dishes
+FoodMatch supports two discovery modes:
+RESTAURANTS | DISHES
+Restaurants
+Users swipe on complete restaurant options.
+Dishes
+Users can browse individual dishes associated with the available restaurant catalog.
+For curated restaurants, FoodMatch can display approximate menu and pricing information.
 
-Leave it running; it serves http://127.0.0.1:8000. SQLite needs no setup.
+For live restaurants without curated menu information, the application does not fabricate menu data.
 
-**2. Frontend** (second terminal), from the project root:
+🌐 Restaurant Discovery
+FoodMatch uses Geoapify for server-side restaurant discovery.
+FoodMatch Backend
+       ↓
+Geoapify Places API
+       ↓
+Restaurant Results
+       ↓
+Normalization
+       ↓
+FoodMatch UI
+When the external restaurant API is unavailable, FoodMatch can fall back to bundled local catalog data.
+This provides both:
 
-```bash
+Live restaurant discovery
+A reliable local fallback
+🧭 Directions
+FoodMatch does not use Google Maps Platform APIs.
+Instead, it generates a keyless Google Maps directions URL.
+
+FoodMatch
+    ↓
+Restaurant coordinates / address
+    ↓
+Google Maps Directions URL
+    ↓
+Google Maps
+No Google Cloud project, Maps API key, or Google billing account is required for directions.
+🔌 API Architecture
+The frontend communicates with Django through a service layer rather than scattering API requests throughout the UI.
+React Screens
+      ↓
+Frontend Service Layer
+      ↓
+Django REST API
+      ↓
+Database / External APIs
+This separation keeps UI components focused on presentation and interaction while backend communication remains centralized.
+🛠 Tech Stack
+Frontend
+React
+Vite
+React Router
+CSS Modules
+Framer Motion
+@use-gesture/react
+Backend
+Python
+Django
+Django REST Framework
+Gunicorn
+Database
+PostgreSQL
+Neon
+SQLite is used for local development.
+External Services
+Geoapify Places API for restaurant discovery
+Google Maps directions URLs for navigation
+Vercel for frontend deployment
+Render for backend deployment
+Neon for hosted PostgreSQL
+📁 Project Structure
+FoodMatch/
+│
+├── backend/
+│   ├── api/
+│   ├── config/
+│   ├── manage.py
+│   ├── requirements.txt
+│   └── .env.example
+│
+├── src/
+│   ├── components/
+│   │   ├── cards/
+│   │   ├── layout/
+│   │   └── primitives/
+│   │
+│   ├── screens/
+│   │   ├── Discover/
+│   │   ├── CreateMatch/
+│   │   ├── InviteFriends/
+│   │   ├── Lobby/
+│   │   ├── Swipe/
+│   │   ├── MatchReveal/
+│   │   ├── RestaurantDetail/
+│   │   └── Profile/
+│   │
+│   ├── services/
+│   ├── store/
+│   ├── hooks/
+│   ├── data/
+│   └── styles/
+│
+├── tests/
+├── package.json
+└── README.md
+🧪 Testing
+FoodMatch includes automated testing across multiple layers.
+Testing covers areas including:
+
+Django API behavior
+Database-backed group sessions
+Group matching
+Solo mode
+Location flows
+Restaurant discovery
+Dish discovery
+Directions
+Swipe interactions
+Network behavior
+Accessibility
+Production builds
+The project also checks that Django migrations remain synchronized with the current models.
+🚀 Running Locally
+Clone the repository
+git clone https://github.com/Abil4sh/FoodMatch.git
+cd FoodMatch
+Frontend
+Install dependencies:
 npm install
+Start the Vite development server:
 npm run dev
-```
+Backend
+Open another terminal and move into the backend:
+cd backend
+Create a virtual environment:
+python3 -m venv .venv
+Activate it:
+source .venv/bin/activate
+Install dependencies:
+pip install -r requirements.txt
+Create a .env file using .env.example as the template.
+Run migrations:
 
-Open http://localhost:5173. If the API is not running, the app shows a clear
-"Can't reach the FoodMatch API" screen with a retry button rather than failing
-silently.
+python manage.py migrate
+Start Django:
+python manage.py runserver
+☁️ Deployment Architecture
+FoodMatch is deployed using a multi-service architecture:
+                    GitHub
+                       │
+             ┌─────────┴─────────┐
+             ▼                   ▼
+          Vercel               Render
+        Frontend              Backend
+             │                   │
+             │                   ▼
+             │            Neon PostgreSQL
+             │
+             └────── REST API ────┘
 
-The API base URL is configurable and is **not** a secret:
+                       │
+                       ▼
+                   Geoapify
+Frontend
+Vercel
+Hosts the React/Vite application.
 
-```bash
-cp .env.example .env        # optional; defaults to http://localhost:8000
-```
+Backend
+Render
+Hosts the Django API using Gunicorn.
 
-To build and preview a production frontend bundle:
+Database
+Neon
+Provides the production PostgreSQL database.
 
-```bash
-npm run build
-npm run preview
-```
+Restaurant Discovery
+Geoapify
+Provides live restaurant discovery through the Django backend.
 
-## Testing
+⚙️ Environment Variables
+Sensitive configuration is stored outside the repository.
+The application uses variables such as:
 
-**Backend** (with the virtualenv active, from `backend/`):
+VITE_API_BASE_URL
 
-```bash
-python manage.py test api
-```
+DATABASE_URL
 
-27 tests covering the endpoints, validation, clean 404/400 handling, that no
-response contains a secret, that no backend module imports anything
-network-capable, and that no outbound socket connection is attempted during a
-request.
+DJANGO_SECRET_KEY
 
-**Frontend unit tests** are plain Node with no test framework and no
-dependencies:
+DJANGO_DEBUG
 
-```bash
-npm test
-```
+DJANGO_ALLOWED_HOSTS
 
-This runs the matching-engine tests (scoring at 100/75/50/25/0%, every
-tie-breaker, single-member groups, empty decks, and the rule that members
-without votes stay in the denominator) and the Food DNA tests.
+DJANGO_CORS_ALLOWED_ORIGINS
 
-There are also browser suites that drive a real Chrome with real mouse and
-touch events. They need `puppeteer-core` and a Chrome binary you already have:
+GEOAPIFY_API_KEY
+Real values are never committed to GitHub.
+The repository contains .env.example as a safe configuration template.
 
-```bash
-npm i -D puppeteer-core
-npm run dev   # in another terminal
+🔒 Security
+FoodMatch includes several production-oriented protections:
+Server-side API secrets
+Environment-based configuration
+Django allowed-host validation
+CORS configuration
+Request throttling
+Database-level duplicate vote protection
+Opaque anonymous participant tokens
+Secrets excluded from Git
+The Geoapify API key is never exposed through a frontend VITE_* variable.
+⚠️ Current Limitations
+FoodMatch is a portfolio project and currently has some limitations:
+Curated menu information covers the bundled restaurant catalog rather than every live restaurant.
+Live restaurant discovery depends on Geoapify availability and API limits.
+Render's free backend tier can sleep after inactivity, which can make the first request slower.
+Group sessions currently expire after a defined period.
+Group progress currently uses polling rather than WebSockets.
+Participants are anonymous session identities rather than permanent user accounts.
+The current restaurant discovery experience is optimized around Bengaluru.
+🗺️ Future Improvements
+Potential future improvements include:
+WebSocket-based real-time group updates
+More comprehensive restaurant and menu data
+Persistent user profiles
+Improved restaurant detail information
+More advanced group preference controls
+Better caching and observability
+Broader geographic coverage
+💭 Why FoodMatch Is Different
+FoodMatch deliberately avoids turning restaurant discovery into another AI recommendation engine.
+The interesting part isn't predicting what people might like.
 
-CHROME=/path/to/chrome node tests/browser.product.mjs   # whole product walkthrough
-CHROME=/path/to/chrome node tests/browser.suite.mjs     # swipe gestures
-CHROME=/path/to/chrome node tests/browser.match.mjs     # match reveal
-CHROME=/path/to/chrome node tests/browser.flow.mjs      # create → lobby flow
-CHROME=/path/to/chrome node tests/audit.mjs             # accessibility/layout audit
-CHROME=/path/to/chrome node tests/browser.network.mjs  # request-volume verification
-```
+It's finding what they already agree on.
 
-`browser.network.mjs` is the one to run before adding any paid API. It counts
-every request the browser makes and asserts that booting costs three calls,
-swiping a full deck costs zero, navigating between loaded screens costs zero,
-and no Google Maps/Places request is made at all.
+REAL RESTAURANTS
+       ↓
+EVERYONE SWIPES
+       ↓
+ACTUAL PREFERENCES
+       ↓
+FOODMATCH ALGORITHM
+       ↓
+EXPLAINABLE MATCHES
+       ↓
+"WE ALL WANT THIS"
+       ↓
+EAT 🍜
+The result is based on the group's actual decisions, not a black-box recommendation.
+👤 Author
+Abilash Anand
+GitHub
 
-Pass `VW=1366 VH=640` to any of them to run at a laptop viewport. See
-`tests/README.md` for details.
-
-## Deployment
-
-**Frontend (Vercel).** Import the repo, framework preset Vite, build `npm run build`,
-output `dist`. Set `VITE_API_BASE_URL` to the deployed Django origin. `vercel.json`
-rewrites all paths to `index.html` so React Router deep links work.
-
-**Backend (any Python host).** `backend/Procfile` declares the release and web
-commands:
-
-```
-release: python manage.py migrate --noinput
-web: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3
-```
-
-Required environment variables:
-
-| Variable | Purpose |
-| --- | --- |
-| `DJANGO_SECRET_KEY` | Required. Startup is refused with `DEBUG=false` and the dev key. |
-| `DJANGO_DEBUG` | `false` in production. |
-| `DJANGO_ALLOWED_HOSTS` | Comma-separated hostnames. |
-| `DJANGO_CORS_ALLOWED_ORIGINS` | Your Vercel origin. Never `*`. |
-| `DJANGO_CSRF_TRUSTED_ORIGINS` | Same. |
-| `DATABASE_URL` | `postgres://…` in production; empty for local SQLite. |
-| `GEOAPIFY_API_KEY` | Server-side only. Empty = bundled catalog, zero outbound calls. |
-
-Never set a Geoapify key in a `VITE_*` variable — Vite publishes those to the browser.
-
-## API
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET | `/api/health/` | Liveness; reports whether a provider key is present |
-| GET | `/api/feed/?lat&lng` | Boot catalog for the selected area |
-| GET | `/api/restaurants/`, `/api/restaurants/<id>/`, `/api/dishes/`, `/api/dishes/<id>/` | Catalog |
-| GET | `/api/restaurants/search/` | Restaurant search |
-| GET | `/api/locations/search/`, `/api/locations/popular/` | Area lookup |
-| POST | `/api/groups/` | Create a FoodMatch; returns code + participant token |
-| POST | `/api/groups/<code>/join/` | Join anonymously |
-| GET | `/api/groups/<code>/` | Group status and participants (polled) |
-| POST | `/api/groups/<code>/start/` | Host starts; freezes the shared deck |
-| GET | `/api/groups/<code>/deck/` | The frozen deck, identical for everyone |
-| POST | `/api/groups/<code>/votes/` | One like or pass; duplicates refused |
-| POST | `/api/groups/<code>/finish/` | Mark this participant done |
-| GET | `/api/groups/<code>/results/` | Server-computed ranking |
-
-## Security notes
-
-Secrets are server-side only and read from the environment at call time, never
-copied into Django settings. Group codes use a 32-character ambiguity-free
-alphabet (≈1.07 billion combinations) and are validated against an anchored
-pattern. The participant token is an opaque bearer credential returned once and
-never included in any group payload, so knowing a code does not let you act as
-someone else. Duplicate votes are refused by a database constraint, not by
-client discipline. All group endpoints are throttled. CORS lists explicit
-origins. No endpoint accepts a URL or an upstream service name, so the API
-cannot be used as a proxy. This is a portfolio project, not an audited system.
-
-## Current limitations
-
-- **Mock restaurant data.** Twelve restaurants and twelve dishes in local JSON.
-  Real names, invented ratings and prices.
-- **No database and no authentication.** The Django API is read-only and
-  unauthenticated; the catalog is JSON on disk.
-- **Restaurant data comes from Geoapify** when a server-side key is present,
-  and from the bundled catalog otherwise. Geoapify is OpenStreetMap-derived: it
-  has no ratings, review counts or prices, so those are omitted rather than
-  invented. Dishes stay curated local data, since no places API supplies menus.
-- **Polling, not push.** Lobby and swipe updates arrive every few seconds
-  rather than instantly.
-- **Sessions expire after 12 hours** and there is no way to rejoin a completed
-  group or remove a participant.
-- **Anonymous identity is per-browser.** Clearing site data loses your place in
-  a group; there are no accounts by design.
-- **Placeholder food imagery.** No photography is bundled. `FoodPhoto` draws an
-  illustrated motif chosen from each card's cuisine, with a per-item backdrop
-  so cards do not repeat. It is a single swap point for real images later.
-- **Directions is a stub.** The button explains that maps are not connected yet.
-- **Small groups produce coarse scores.** With four members there are only five
-  possible percentages, so runners-up often tie and are separated by rating or
-  distance.
-
-## Future improvements
-
-None of the following is implemented — this is the roadmap, not the changelog.
-
-- PostgreSQL for groups, votes and match history
-- Authentication and real user accounts
-- Richer restaurant metadata: Geoapify (OpenStreetMap) supplies names,
-  addresses and categories but no ratings, review counts or prices
-- Real-time group sessions over WebSockets, replacing the simulated timers
-- Real food photography behind the existing `FoodPhoto` component
-- Smarter ranking — dietary constraints, budget fit and past behaviour as
-  weighted signals rather than a flat like ratio
-- Match history as a full screen with filtering and re-matching
-
-## License
-
-Portfolio project, not currently licensed for reuse.
